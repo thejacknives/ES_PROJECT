@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import User
-from accounts.utils.aws import upload_image_to_s3
+from accounts.utils.aws import upload_image_to_s3, index_face_s3
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -21,7 +21,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         upload_image_to_s3(face_image, image_key)
 
         # Index in Rekognition
-        #face_id = index_face_s3(image_key, validated_data['username'])
+        face_id = index_face_s3(image_key, validated_data['username'])
 
         # Save user
         user = User.objects.create(
