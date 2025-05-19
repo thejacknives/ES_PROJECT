@@ -1,1 +1,40 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pyc
+*.egg-info/
+
+# Django
+db.sqlite3
+*.log
+
+# VS Code or other IDEs
+.vscode/
+.idea/
+*.swp
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Virtualenv
+venv/
+env/
+
+# Environment variables and secrets
 .env
+
+# AWS credential files (if any)
+*.pem
+*.key
+
+# Pytest / test output
+htmlcov/
+.coverage
+*.cover
+
+# Static/media root folders (optional depending on use)
+staticfiles/
+media/
