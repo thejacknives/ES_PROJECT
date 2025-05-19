@@ -38,12 +38,16 @@ def index_face_s3(s3_key, external_id):
 
 
 def search_face_s3(s3_key):
-    response = rekognition.search_faces_by_image(
-        CollectionId=collection,
-        Image={'S3Object': {'Bucket': 'prime-tech-images', 'Name': s3_key}},
-        MaxFaces=1,
-        FaceMatchThreshold=95
-    )
-    if response['FaceMatches']:
-        return response['FaceMatches'][0]['Face']['FaceId']
-    return None
+    try:
+        response = rekognition.search_faces_by_image(
+            CollectionId=collection,
+            Image={'S3Object': {'Bucket': bucket, 'Name': s3_key}},
+            MaxFaces=1,
+            FaceMatchThreshold=90
+        )
+        if response['FaceMatches']:
+            return response['FaceMatches'][0]['Face']['FaceId']
+        return None
+    except Exception as e:
+        print("Error searching face:", e)
+        return None
