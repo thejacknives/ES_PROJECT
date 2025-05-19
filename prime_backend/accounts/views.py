@@ -8,7 +8,7 @@ import uuid
 from .utils.aws import upload_image_to_s3, search_face_s3
 from .models import User
 from django.contrib.auth import authenticate
-
+from accounts.utils.auth import generate_jwt
 
 @api_view(['POST'])
 def login_with_face(request):
@@ -41,7 +41,10 @@ def login_with_credentials(request):
 
     user = authenticate(request, email=email, password=password)
     if user:
-        return Response({'message': f'Welcome back, {user.username}!'}, status=200)
+        token = generate_jwt(user)
+        #return token in reponse and message
+        return Response({'token': token, 'message': f'Welcome back, {user.username}!'}, status=200)
+
     return Response({'error': 'Invalid email or password'}, status=403)
 
 @api_view(['POST'])
@@ -61,6 +64,7 @@ def login_with_face(request):
 
     try:
         user = User.objects.get(face_id=face_id)
-        return Response({'message': f'Welcome back, {user.username}!'}, status=200)
+        token = generate_jwt(user)
+        return Response({'token':token, 'message': f'Welcome back, {user.username}!'}, status=200)
     except User.DoesNotExist:
         return Response({'error': 'User not found for face ID'}, status=404)
