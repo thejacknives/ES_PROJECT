@@ -3,7 +3,7 @@ body, html {
   margin: 0;
   padding: 0;
   font-family: 'SF Pro', 'Helvetica Neue', sans-serif;
-  background: linear-gradient(135deg, #e0d4fd, #f2e5f4);
+  background: linear-gradient(135deg, #d5deea, #ece2ed);
   height: 100vh;
 }
 
@@ -23,7 +23,7 @@ body, html {
   padding: 2.5rem;
   max-width: 380px;
   width: 100%;
-  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 90px rgba(0, 0, 0, 0.15);
   text-align: center;
   border: 1px solid rgba(255, 255, 255, 0.3);
 }
@@ -55,7 +55,7 @@ input[type="file"] {
 .login-btn {
   width: 100%;
   padding: 12px;
-  background: linear-gradient(to right, #5a7fff, #6d5dfc);
+  background: linear-gradient(to right, #587fab, #6397bc);
   box-shadow: 0 4px 15px rgba(109, 93, 252, 0.3);
   color: white;
   font-weight: bold;
