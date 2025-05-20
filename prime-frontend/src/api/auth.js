@@ -20,3 +20,7 @@ export async function loginUserFace(data, headers = {}) {
   return axios.post(`${BASE_URL}/login/face/`, data, {
   });
 }
+
+export function list_services() {
+  return axios.get(`${BASE_URL}/services/`);
+}
