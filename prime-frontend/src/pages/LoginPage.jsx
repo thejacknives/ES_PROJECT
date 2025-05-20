@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import './LoginPage.css';
 import logo from '../assets/image.png'; // Ensure this logo is present
 import { useNavigate } from 'react-router-dom';
-import { loginUser } from '../api/auth';
+import { loginUser, loginUserFace } from '../api/auth';
 
 const LoginPage = () => {
   const [email, setEmail] = useState('');
@@ -36,12 +36,16 @@ const LoginPage = () => {
     formData.append('face_image', faceImage);
 
     try {
-      const res = await fetch('http://127.0.0.1:8000/api/login/face/', {
-        method: 'POST',
-        body: formData,
+      const res = await loginUserFace(formData, {
+        
+          'Content-Type': 'multipart/form-data',
+        
       });
-      if (!res.ok) throw new Error();
-      const data = await res.json();
+      const { data } = res;
+      if (data.error) {
+        setError(data.error);
+        return;
+      }
       console.log('Login success with face:', data);
       navigate('/dashboard');
     } catch {

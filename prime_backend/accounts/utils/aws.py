@@ -10,6 +10,10 @@ load_dotenv()
 region = os.getenv('AWS_REGION_NAME')
 bucket = os.getenv('AWS_S3_BUCKET')
 collection = os.getenv('AWS_REKOGNITION_COLLECTION')
+rekognition = boto3.client('rekognition', aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+                        aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+                        aws_session_token=os.getenv("aws_session_token"),
+                        region_name=os.getenv('AWS_REGION_NAME'))
 
 s3_client = boto3.client('s3',
                         aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
@@ -27,7 +31,7 @@ def upload_image_to_s3(image_file, s3_key):
     )
 
 
-rekognition = boto3.client('rekognition', region_name='us-east-1')  # or your actual region
+  # or your actual region
 def index_face_s3(s3_key, external_id):
     response = rekognition.index_faces(
         CollectionId=collection,
