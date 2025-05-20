@@ -101,6 +101,9 @@ const LoginPage = () => {
             Login with Face
           </button>
         </div>
+        <div className="switch-mode">
+          <button onClick={() => navigate('/register')}>Don't have an account yet? Register</button>
+        </div>
       </div>
     </div>
   );
