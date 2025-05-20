@@ -10,6 +10,12 @@ from .models import User
 from django.contrib.auth import authenticate
 from accounts.utils.auth import generate_jwt
 from accounts.utils.aws import s3_client, bucket
+from accounts.utils.aws import invoke_lambda
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from accounts.utils.aws import start_repair_workflow  # You already have this
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 @api_view(['POST'])
 def login_with_face(request):
@@ -81,3 +87,65 @@ def login_with_face(request):
         s3_client.delete_object(Bucket=bucket, Key=temp_key)
 
         return Response({'error': 'User not found for face ID'}, status=404)
+
+@api_view(["POST"])
+@csrf_exempt
+def test_start_workflow(request):
+    data = request.data
+    result = start_repair_workflow(data)
+    return Response(result)
+
+
+@api_view(['POST'])
+def submit_repair_request(request):
+    user_id = request.data.get("user_id")
+    urgency = request.data.get("urgency", False)
+    appointment_datetime = request.data.get("appointment_datetime")
+
+    input_data = {
+        "user_id": user_id,
+        "urgency": urgency,
+        "appointment_datetime": appointment_datetime,
+        "customer_showed_up": True  # or False if testing no-show logic
+    }
+
+    response = start_repair_workflow(input_data)
+    return Response({"workflow_execution": response})
+
+@api_view(['POST'])
+def submit_approval(request):
+    token = request.data.get('task_token')
+    approved = request.data.get('customer_approved', False)
+
+    result = invoke_lambda("HandleApprovalCallback", {
+        "taskToken": token,
+        "customer_approved": approved
+    })
+
+    return Response(result)
+
+#payment callback
+@api_view(['POST'])
+def submit_payment(request):
+    token = request.data.get('task_token')
+    paid = request.data.get('payment_received', False)
+
+    result = invoke_lambda("HandlePaymentCallback", {
+        "taskToken": token,
+        "payment_received": paid
+    })
+    return Response(result)
+
+#pickup callback
+@api_view(['POST'])
+def submit_pickup(request):
+    token = request.data.get('task_token')
+    picked = request.data.get('picked_up', False)
+    final_payment = request.data.get('final_payment', 0)
+
+    result = invoke_lambda("HandlePickupCallback", {
+        "taskToken": token,
+        "picked_up": picked,
+        "final_payment": final_payment
+    })
+    return Response(result)
