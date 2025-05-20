@@ -1,12 +1,12 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import RegisterSerializer
+from .serializers import RegisterSerializer, ServiceSerializer
 from rest_framework.decorators import api_view
 import uuid
 #get functions for /utils
 from .utils.aws import upload_image_to_s3, search_face_s3
-from .models import User
+from .models import User, Service, Appointment, Service
 from django.contrib.auth import authenticate
 from accounts.utils.auth import generate_jwt
 from accounts.utils.aws import s3_client, bucket
@@ -16,6 +16,8 @@ from rest_framework.response import Response
 from accounts.utils.aws import start_repair_workflow  # You already have this
 from django.views.decorators.csrf import csrf_exempt
 import json
+from datetime import datetime, timedelta, time
+
 
 @api_view(['POST'])
 def login_with_face(request):
@@ -101,12 +103,31 @@ def submit_repair_request(request):
     user_id = request.data.get("user_id")
     urgency = request.data.get("urgency", False)
     appointment_datetime = request.data.get("appointment_datetime")
+    service_id = request.data.get("service_id")
+
+    try:
+        service = Service.objects.get(id=service_id)
+    except Service.DoesNotExist:
+        return Response({"error": "Invalid service ID"}, status=400)
+
+    if Appointment.objects.filter(datetime=appointment_datetime).exists():
+        return Response({"error": "Time slot already booked"}, status=409)
+
+    # Save appointment
+    Appointment.objects.create(
+        user_id=user_id,
+        service=service,
+        datetime=appointment_datetime
+    )
 
     input_data = {
         "user_id": user_id,
         "urgency": urgency,
         "appointment_datetime": appointment_datetime,
-        "customer_showed_up": True  # or False if testing no-show logic
+        "service_id": service_id,
+        "service_name": service.name,
+        "base_price": float(service.base_price),
+        "customer_showed_up": True  # for testing
     }
 
     response = start_repair_workflow(input_data)
@@ -149,3 +170,44 @@ def submit_pickup(request):
         "final_payment": final_payment
     })
     return Response(result)
+
+
+
+@api_view(["GET"])
+def get_available_slots(request):
+    date_str = request.GET.get("date")  # expects 'YYYY-MM-DD'
+    if not date_str:
+        return Response({"error": "Missing date"}, status=400)
+
+    try:
+        date = datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        return Response({"error": "Invalid date format"}, status=400)
+
+    opening = time(9, 0)
+    closing = time(17, 0)
+    step = timedelta(minutes=30)
+
+    slots = []
+    current = datetime.combine(date, opening)
+    end = datetime.combine(date, closing)
+
+    existing = set(Appointment.objects.filter(
+        datetime__date=date
+    ).values_list("datetime", flat=True))
+
+    while current <= end:
+        if current not in existing:
+            slots.append(current.isoformat())
+        current += step
+
+    return Response({"available_slots": slots})
+
+
+
+
+@api_view(['GET'])
+def list_services(request):
+    services = Service.objects.all()
+    serializer = ServiceSerializer(services, many=True)
+    return Response(serializer.data)

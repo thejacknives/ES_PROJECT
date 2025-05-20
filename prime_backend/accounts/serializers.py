@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User
+from .models import User, Service
 from accounts.utils.aws import upload_image_to_s3, index_face_s3
 
 
@@ -32,3 +32,8 @@ class RegisterSerializer(serializers.ModelSerializer):
         user.set_password(password)
         user.save()
         return user
+
+class ServiceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = ['id', 'name', 'base_price']

@@ -46,7 +46,21 @@ class Service(models.Model):
     base_price = models.DecimalField(max_digits=10, decimal_places=2)
 
     class Meta:
-        db_table = 'services'  # ✅ important: match the existing table name
+        managed = False
+        db_table = 'services'
 
     def __str__(self):
-        return f"{self.name} - €{self.base_price}"
+        return self.name
+
+
+
+
+
+class Appointment(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    service = models.ForeignKey(Service, on_delete=models.CASCADE)
+    datetime = models.DateTimeField(unique=True)  # ensures no overlaps
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.user} - {self.service.name} at {self.datetime}"
