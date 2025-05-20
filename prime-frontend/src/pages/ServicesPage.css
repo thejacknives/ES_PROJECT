@@ -1,0 +1,77 @@
+/* Page wrapper and title */
+.services-page {
+  padding-top: 80px;            /* space for fixed header */
+  padding: 80px 2rem 2rem;      /* top, sides, bottom */
+  background: linear-gradient(135deg, #d5deea, #ece2ed);
+  min-height: 100vh;
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.services-title {
+  font-size: 2rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+  color: #2e2e2e;
+}
+
+/* Grid of square cards, centered */
+.services-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.1rem;
+  width: 100%;
+  max-width: 1000px;
+}
+
+/* Each card is square */
+.service-card {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+  aspect-ratio: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 1rem;
+  transition: background 0.2s, color 0.2s, transform 0.2s, box-shadow 0.2s;
+}
+
+.service-card:hover {
+  background: #3b82f6;
+  transform: translateY(-5px);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+}
+
+.service-card:hover .service-name,
+.service-card:hover .service-price {
+  color: white;
+}
+
+.service-name {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #2e2e2e;
+  margin-bottom: 0.5rem;
+}
+
+.service-price {
+  font-size: 1.2rem;
+  font-weight: bold;
+  color: #3b82f6;
+}
+
+/* Centered loading & error */
+.loading,
+.error {
+  margin-top: 2rem;
+  text-align: center;
+  font-size: 1.2rem;
+  color: #444;
+}

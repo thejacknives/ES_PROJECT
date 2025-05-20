@@ -98,3 +98,9 @@ input[type="file"] {
   background: #3b82f6;
   color: white;
 }
+
+.success {
+  color: #16a34a; /* green */
+  margin-bottom: 1rem;
+  font-weight: 500;
+}
