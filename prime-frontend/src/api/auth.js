@@ -13,7 +13,6 @@ export async function registerUser(data) {
 
 export async function loginUser(data) {
   return axios.post(`${BASE_URL}/login/credentials/`, data, {
-    headers: defaultHeaders
   });
 }
 
