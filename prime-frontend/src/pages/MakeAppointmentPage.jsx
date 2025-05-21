@@ -14,24 +14,23 @@ export default function MakeAppointmentPage() {
 
   // Load services on mount
   useEffect(() => {
-    list_services().then(res => setServices(res.data));
+    list_services()
+      .then(res => setServices(res.data))
+      .catch(err => console.error('Error loading services', err));
   }, []);
 
   // When date changes, fetch slots
   useEffect(() => {
     if (date) {
-      console.log("Fetching slots for date:", date);
       getAvailableSlots(date)
         .then(res => {
-          console.log("Received slots raw:", res.data);
-          // Backend returns { date: "...", available_slots: [ ... ] }
           const data = Array.isArray(res.data.available_slots)
             ? res.data.available_slots
             : [];
           setSlots(data);
         })
         .catch(err => {
-          console.error("Error fetching slots", err);
+          console.error("Error fetching slots", err.response || err);
           setSlots([]);
         });
     } else {
@@ -40,25 +39,40 @@ export default function MakeAppointmentPage() {
   }, [date]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!serviceId || !date || !slot) {
-      setMessage('Please select service, date, and slot.');
-      return;
-    }
-    try {
-      await bookAppointment({ service_id: serviceId, date, slot, urgent });
-      setMessage('Appointment booked successfully!');
-    } catch (err) {
-      console.error(err);
-      setMessage('Failed to book appointment.');
-    }
+  e.preventDefault();
+  if (!serviceId || !date || !slot) {
+    setMessage('Please select service, date, and slot.');
+    return;
+  }
+
+  // Build ISO datetime string from date + slot
+  // e.g. date="2025-05-20", slot="10:00" → "2025-05-20T10:00:00Z"
+  const appointment_datetime = `${date}T${slot}:00Z`;
+
+  const payload = {
+    service_id: serviceId,
+    appointment_datetime,
+    urgency: urgent,
+    customer_showed_up: true,
   };
+
+  try {
+    await bookAppointment(payload);
+    setMessage('Appointment booked successfully!');
+  } catch (err) {
+    console.error('Booking error:', err.response?.status, err.response?.data);
+    const serverMsg =
+      err.response?.data?.detail ||
+      err.response?.data?.message ||
+      'Failed to book appointment.';
+    setMessage(serverMsg);
+  }
+};
 
   return (
     <div className="appoint-page">
       <h1>Make an Appointment</h1>
       <form className="appoint-form" onSubmit={handleSubmit}>
-        {/* Service selector */}
         <label>
           Service
           <select
@@ -75,7 +89,6 @@ export default function MakeAppointmentPage() {
           </select>
         </label>
 
-        {/* Date picker */}
         <label>
           Pick a date
           <input 
@@ -86,7 +99,6 @@ export default function MakeAppointmentPage() {
           />
         </label>
 
-        {/* Available slots */}
         {date && (
           <label>
             Available Slots
@@ -109,7 +121,6 @@ export default function MakeAppointmentPage() {
           </label>
         )}
 
-        {/* Urgent checkbox */}
         <label className="urgent-label">
           <input 
             type="checkbox" 
