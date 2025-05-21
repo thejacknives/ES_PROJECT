@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from 'react';
-import './MakeAppointmentPage.css'; 
+import React, { useState, useEffect, useContext } from 'react';
+import './MakeAppointmentPage.css';
 import { list_services } from '../api/auth';
 import { getAvailableSlots, bookAppointment } from '../api/appointments';
+import { AuthContext } from '../contexts/AuthContext';
 
 export default function MakeAppointmentPage() {
-  const [services, setServices] = useState([]);
+  const { user } = useContext(AuthContext); // user now contains { token, message, user_id }
+  const [services, setServices]   = useState([]);
   const [serviceId, setServiceId] = useState('');
   const [date, setDate]           = useState('');
   const [slots, setSlots]         = useState([]);
   const [slot, setSlot]           = useState('');
-  const [urgent, setUrgent]       = useState(false);
+  const [urgency, setUrgency]     = useState(false);
   const [message, setMessage]     = useState('');
 
   // Load services on mount
@@ -24,13 +26,13 @@ export default function MakeAppointmentPage() {
     if (date) {
       getAvailableSlots(date)
         .then(res => {
-          const data = Array.isArray(res.data.available_slots)
+          const arr = Array.isArray(res.data.available_slots)
             ? res.data.available_slots
             : [];
-          setSlots(data);
+          setSlots(arr);
         })
         .catch(err => {
-          console.error("Error fetching slots", err.response || err);
+          console.error('Error fetching slots', err);
           setSlots([]);
         });
     } else {
@@ -39,35 +41,39 @@ export default function MakeAppointmentPage() {
   }, [date]);
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!serviceId || !date || !slot) {
-    setMessage('Please select service, date, and slot.');
-    return;
-  }
+    e.preventDefault();
+    if (!serviceId || !date || !slot) {
+      setMessage('Please select service, date, and slot.');
+      return;
+    }
+    if (!user?.user_id) {
+      setMessage('User ID not found. Please log in again.');
+      return;
+    }
 
-  // Build ISO datetime string from date + slot
-  // e.g. date="2025-05-20", slot="10:00" → "2025-05-20T10:00:00Z"
-  const appointment_datetime = `${date}T${slot}:00Z`;
+    // Build ISO datetime string
+    const appointment_datetime = `${date}T${slot}:00Z`;
 
-  const payload = {
-    service_id: serviceId,
-    appointment_datetime,
-    urgency: urgent,
-    customer_showed_up: true,
+    const payload = {
+      user_id:            user.user_id,
+      service_id:         parseInt(serviceId, 10),
+      appointment_datetime,
+      urgency:            urgency,
+      customer_showed_up: true,
+    };
+
+    try {
+      await bookAppointment(payload);
+      setMessage('Appointment booked successfully!');
+    } catch (err) {
+      console.error('Booking error:', err.response?.status, err.response?.data);
+      const serverMsg =
+        err.response?.data?.detail ||
+        err.response?.data?.message ||
+        'Failed to book appointment.';
+      setMessage(serverMsg);
+    }
   };
-
-  try {
-    await bookAppointment(payload);
-    setMessage('Appointment booked successfully!');
-  } catch (err) {
-    console.error('Booking error:', err.response?.status, err.response?.data);
-    const serverMsg =
-      err.response?.data?.detail ||
-      err.response?.data?.message ||
-      'Failed to book appointment.';
-    setMessage(serverMsg);
-  }
-};
 
   return (
     <div className="appoint-page">
@@ -91,11 +97,11 @@ export default function MakeAppointmentPage() {
 
         <label>
           Pick a date
-          <input 
-            type="date" 
-            value={date} 
-            onChange={e => setDate(e.target.value)} 
-            required 
+          <input
+            type="date"
+            value={date}
+            onChange={e => setDate(e.target.value)}
+            required
           />
         </label>
 
@@ -122,10 +128,10 @@ export default function MakeAppointmentPage() {
         )}
 
         <label className="urgent-label">
-          <input 
-            type="checkbox" 
-            checked={urgent} 
-            onChange={e => setUrgent(e.target.checked)} 
+          <input
+            type="checkbox"
+            checked={urgency}
+            onChange={e => setUrgency(e.target.checked)}
           />
           Mark as urgent
         </label>

@@ -7,16 +7,16 @@ import { AuthContext } from '../contexts/AuthContext';
 
 const LoginPage = () => {
   const { setUser } = useContext(AuthContext);
-  const [email, setEmail] = useState('');
+  const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [faceImage, setFaceImage] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
-  const [error, setError] = useState('');
-  const [mode, setMode] = useState('credentials');
+  const [error, setError]       = useState('');
+  const [mode, setMode]         = useState('credentials');
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Determine where to redirect after login
+  // Redirect back to where they wanted, default /services
   const from = location.state?.from?.pathname || '/services';
 
   const handleCredentialsLogin = async (e) => {
@@ -24,12 +24,18 @@ const LoginPage = () => {
     setError('');
     try {
       const res = await loginUser({ email, password });
-      const { token, message } = res.data;
+      const { token, message, user_id } = res.data;
+
+      // Persist in localStorage
       localStorage.setItem('token', token);
       localStorage.setItem('welcomeMessage', message);
-      setUser({ token, message });
+      localStorage.setItem('user_id', user_id);
+
+      // Update context with user_id
+      setUser({ token, message, user_id });
+
       setSuccessMessage(message);
-      setTimeout(() => navigate(from, { replace: true }), 1500);
+      setTimeout(() => navigate(from, { replace: true }), 1200);
     } catch {
       setError('Invalid credentials');
     }
@@ -44,14 +50,16 @@ const LoginPage = () => {
     setError('');
     const formData = new FormData();
     formData.append('face_image', faceImage);
+
     try {
       const res = await loginUserFace(formData);
-      const { token, message } = res.data;
+      const { token, message, user_id } = res.data;
       localStorage.setItem('token', token);
       localStorage.setItem('welcomeMessage', message);
-      setUser({ token, message });
+      localStorage.setItem('user_id', user_id);
+      setUser({ token, message, user_id });
       setSuccessMessage(message);
-      setTimeout(() => navigate(from, { replace: true }), 1500);
+      setTimeout(() => navigate(from, { replace: true }), 1200);
     } catch {
       setError('Face login failed');
     }
@@ -60,7 +68,7 @@ const LoginPage = () => {
   return (
     <div className="login-bg">
       <div className="login-card">
-        <img src={logo} alt="Logo" className="login-logo" style={{ width: '150px', height: 'auto' }} />
+        <img src={logo} alt="Logo" className="login-logo" />
         <h2>LOGIN</h2>
         {successMessage && <p className="success">{successMessage}</p>}
 
@@ -70,33 +78,29 @@ const LoginPage = () => {
               type="email"
               placeholder="Email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={e => setEmail(e.target.value)}
               required
             />
             <input
               type="password"
               placeholder="Password"
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={e => setPassword(e.target.value)}
               required
             />
             {error && <p className="error">{error}</p>}
-            <button type="submit" className="login-btn">
-              Login
-            </button>
+            <button type="submit" className="login-btn">Login</button>
           </form>
         ) : (
           <form onSubmit={handleFaceLogin}>
             <input
               type="file"
               accept="image/*"
-              onChange={(e) => setFaceImage(e.target.files[0])}
+              onChange={e => setFaceImage(e.target.files[0])}
               required
             />
             {error && <p className="error">{error}</p>}
-            <button type="submit" className="login-btn">
-              Login with Face
-            </button>
+            <button type="submit" className="login-btn">Login with Face</button>
           </form>
         )}
 

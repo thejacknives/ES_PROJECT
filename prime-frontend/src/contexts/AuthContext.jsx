@@ -5,18 +5,20 @@ export const AuthContext = createContext();
 export function AuthProvider({ children }) {
   const [user, setUser] = useState(null);
 
-  // On mount, restore auth state from localStorage
+  // On mount, restore auth state
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token   = localStorage.getItem('token');
     const message = localStorage.getItem('welcomeMessage');
-    if (token) {
-      setUser({ token, message });
+    const user_id = localStorage.getItem('user_id');
+    if (token && user_id) {
+      setUser({ token, message, user_id: Number(user_id) });
     }
   }, []);
 
   const logout = () => {
     localStorage.removeItem('token');
     localStorage.removeItem('welcomeMessage');
+    localStorage.removeItem('user_id');
     setUser(null);
   };
 

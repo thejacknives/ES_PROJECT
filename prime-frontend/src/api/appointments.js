@@ -9,14 +9,14 @@ export function getAvailableSlots(date) {
 }
 
 /**
- * Submit a new repair request to the backend.
- * Uses the `submit_repair_request` endpoint.
- * Payload should include:
+ * Submit a new repair request to the backend via /start-repair/
+ * Expects payload:
  *   {
- *     service_id: number,
- *     date:       string,    // "YYYY-MM-DD"
- *     slot:       string,    // e.g. "09:30"
- *     urgent:     boolean
+ *     user_id:             number,
+ *     service_id:          number,
+ *     appointment_datetime:string,  // "YYYY-MM-DDTHH:mm:00Z"
+ *     urgency:             boolean,
+ *     customer_showed_up:   boolean
  *   }
  */
 export function bookAppointment(data) {
