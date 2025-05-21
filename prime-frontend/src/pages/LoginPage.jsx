@@ -1,7 +1,7 @@
 import React, { useState, useContext } from 'react';
 import './LoginPage.css';
 import logo from '../assets/image.png';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { loginUser, loginUserFace } from '../api/auth';
 import { AuthContext } from '../contexts/AuthContext';
 
@@ -14,6 +14,10 @@ const LoginPage = () => {
   const [error, setError] = useState('');
   const [mode, setMode] = useState('credentials');
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Determine where to redirect after login
+  const from = location.state?.from?.pathname || '/services';
 
   const handleCredentialsLogin = async (e) => {
     e.preventDefault();
@@ -21,14 +25,12 @@ const LoginPage = () => {
     try {
       const res = await loginUser({ email, password });
       const { token, message } = res.data;
-      // Persist token and welcome message
       localStorage.setItem('token', token);
       localStorage.setItem('welcomeMessage', message);
-      // Update context
       setUser({ token, message });
       setSuccessMessage(message);
-      setTimeout(() => navigate('/services'), 1500);
-    } catch (err) {
+      setTimeout(() => navigate(from, { replace: true }), 1500);
+    } catch {
       setError('Invalid credentials');
     }
   };
@@ -49,7 +51,7 @@ const LoginPage = () => {
       localStorage.setItem('welcomeMessage', message);
       setUser({ token, message });
       setSuccessMessage(message);
-      setTimeout(() => navigate('/services'), 1500);
+      setTimeout(() => navigate(from, { replace: true }), 1500);
     } catch {
       setError('Face login failed');
     }
@@ -58,12 +60,7 @@ const LoginPage = () => {
   return (
     <div className="login-bg">
       <div className="login-card">
-        <img
-          src={logo}
-          alt="Logo"
-          className="login-logo"
-          style={{ width: '150px', height: 'auto' }}
-        />
+        <img src={logo} alt="Logo" className="login-logo" style={{ width: '150px', height: 'auto' }} />
         <h2>LOGIN</h2>
         {successMessage && <p className="success">{successMessage}</p>}
 

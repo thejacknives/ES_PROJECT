@@ -1,8 +1,8 @@
 import React, { useContext } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import './Header.css';
 import logo from '../assets/image.png';
 import { AuthContext } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 
 export default function Header() {
   const { user, logout } = useContext(AuthContext);
@@ -19,10 +19,11 @@ export default function Header() {
         <img src={logo} alt="Logo" className="header-logo" />
 
         <nav className="header-nav">
-          <a href="/">Home</a>
-          <a href="/services">Services</a>
-          <a href="/about">About</a>
-          <a href="/contact">Contact</a>
+          <Link to="/">Home</Link>
+          <Link to="/services">Services</Link>
+          <Link to="/make-appointment">Make Appointment</Link>
+          <Link to="/about">About</Link>
+          <Link to="/contact">Contact</Link>
           <div className="spacer" />
 
           {user ? (
@@ -30,12 +31,12 @@ export default function Header() {
               Logout
             </button>
           ) : (
-            <a href="/login" className="login-link">
+            <Link to="/login" className="login-link">
               Login
-            </a>
+            </Link>
           )}
         </nav>
       </div>
     </header>
-  );
+);
 }
