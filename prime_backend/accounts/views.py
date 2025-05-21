@@ -180,8 +180,9 @@ def submit_pickup(request):
 
 
 
+
+#@permission_classes([IsAuthenticated])
 @api_view(["GET"])
-@permission_classes([IsAuthenticated])
 def get_available_slots(request):
     date_str = request.GET.get("date")  # expects 'YYYY-MM-DD'
     if not date_str:
