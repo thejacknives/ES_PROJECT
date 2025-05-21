@@ -10,14 +10,14 @@
 .header-glass {
   display: flex;
   align-items: center;
-  max-width: 1000px;            /* Match services grid max-width */
-  margin: 0 auto;               /* Center container */
-  background: rgba(255,255,255,0.1);
+  max-width: 1000px;            /* matches services grid max-width */
+  margin: 0 auto;
+  background: rgba(255, 255, 255, 0.1);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border-radius: 12px;
   padding: 0.5rem 1rem;
-  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .header-logo {
@@ -32,18 +32,23 @@
   gap: 1.5rem;
 }
 
-.header-nav a {
+.header-nav a,
+.header-nav button {
   color: #2e2e2e;
   font-weight: 500;
   text-decoration: none;
+  background: none;
+  border: none;
+  cursor: pointer;
   transition: color 0.2s;
 }
 
-.header-nav a:hover {
+.header-nav a:hover,
+.header-nav button:hover {
   color: #3b82f6;
 }
 
-/* Push login to the right */
+/* Push login/logout to the right */
 .spacer {
   flex: 1;
 }
