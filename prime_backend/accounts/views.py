@@ -87,7 +87,7 @@ def login_with_face(request):
         s3_client.delete_object(Bucket=bucket, Key=temp_key)
 
         return Response({'error': 'User not found for face ID'}, status=404)
-
+#FOR TEST ONLY ---- IGNORE
 @api_view(["POST"])
 @csrf_exempt
 def test_start_workflow(request):
@@ -95,7 +95,7 @@ def test_start_workflow(request):
     result = start_repair_workflow(data)
     return Response(result)
 
-
+#for the start of the workflow
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def submit_repair_request(request):
@@ -132,6 +132,12 @@ def submit_repair_request(request):
     response = start_repair_workflow(input_data)
     return Response({"workflow_execution": response})
 
+
+
+#for the approval callback
+# This is the callback that will be invoked by the Step Function 
+# when the customer approves or rejects the repair request.
+# It will be called from the Step Function
 @api_view(['POST'])
 def submit_approval(request):
     token = request.data.get('task_token')
@@ -157,6 +163,7 @@ def submit_payment(request):
     return Response(result)
 
 #pickup callback
+#will do the pickup and final payment logic.
 @api_view(['POST'])
 def submit_pickup(request):
     token = request.data.get('task_token')
