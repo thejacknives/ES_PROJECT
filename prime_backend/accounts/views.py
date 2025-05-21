@@ -96,7 +96,7 @@ def test_start_workflow(request):
     return Response(result)
 
 #for the start of the workflow
-@api_view(['POST'])
+
 #@permission_classes([IsAuthenticated])
 @api_view(['POST'])
 def submit_repair_request(request):
