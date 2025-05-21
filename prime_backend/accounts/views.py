@@ -2,17 +2,15 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from .serializers import RegisterSerializer, ServiceSerializer
-from rest_framework.decorators import api_view
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
 import uuid
-#get functions for /utils
 from .utils.aws import upload_image_to_s3, search_face_s3
 from .models import User, Service, Appointment, Service
 from django.contrib.auth import authenticate
 from accounts.utils.auth import generate_jwt
 from accounts.utils.aws import s3_client, bucket
 from accounts.utils.aws import invoke_lambda
-from rest_framework.decorators import api_view
-from rest_framework.response import Response
 from accounts.utils.aws import start_repair_workflow  # You already have this
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -99,8 +97,9 @@ def test_start_workflow(request):
 
 
 @api_view(['POST'])
+@permission_classes([IsAuthenticated])
 def submit_repair_request(request):
-    user_id = request.data.get("user_id")
+    user_id = request.data.get(request.user.id)
     urgency = request.data.get("urgency", False)
     appointment_datetime = request.data.get("appointment_datetime")
     service_id = request.data.get("service_id")
@@ -174,6 +173,7 @@ def submit_pickup(request):
 
 
 @api_view(["GET"])
+@permission_classes([IsAuthenticated])
 def get_available_slots(request):
     date_str = request.GET.get("date")  # expects 'YYYY-MM-DD'
     if not date_str:
@@ -211,3 +211,44 @@ def list_services(request):
     services = Service.objects.all()
     serializer = ServiceSerializer(services, many=True)
     return Response(serializer.data)
+
+
+
+@api_view(['GET'])
+def available_slots(request):
+    date_str = request.query_params.get('date')
+    if not date_str:
+        return Response({"error": "Missing date parameter. Format: YYYY-MM-DD"}, status=400)
+
+    try:
+        selected_date = datetime.strptime(date_str, "%Y-%m-%d").date()
+    except ValueError:
+        return Response({"error": "Invalid date format. Use YYYY-MM-DD."}, status=400)
+
+    start_time = time(9, 0)
+    end_time = time(18, 0)
+    slot_duration = timedelta(minutes=30)
+
+    # Start building all slots
+    current_dt = datetime.combine(selected_date, start_time)
+    end_dt = datetime.combine(selected_date, end_time)
+    slots = []
+
+    while current_dt < end_dt:
+        slots.append(current_dt)
+        current_dt += slot_duration
+
+    # Get booked appointment times
+    booked_times = Appointment.objects.filter(
+        datetime__date=selected_date
+    ).values_list('datetime', flat=True)
+
+    # Filter out already booked slots
+    available = [
+        dt.strftime("%H:%M") for dt in slots if dt not in booked_times
+    ]
+
+    return Response({
+        "date": selected_date.strftime("%Y-%m-%d"),
+        "available_slots": available
+    })
