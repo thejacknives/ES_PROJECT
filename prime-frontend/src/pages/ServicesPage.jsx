@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import './ServicesPage.css';
 import { list_services } from '../api/auth';
+//import { AuthContext } from '../contexts/AuthContext';
 
 const ServicesPage = () => {
   const [services, setServices] = useState([]);

@@ -1,10 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import './LoginPage.css';
 import logo from '../assets/image.png';
 import { useNavigate } from 'react-router-dom';
 import { loginUser, loginUserFace } from '../api/auth';
+import { AuthContext } from '../contexts/AuthContext';
 
 const LoginPage = () => {
+  const { setUser } = useContext(AuthContext);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [faceImage, setFaceImage] = useState(null);
@@ -18,9 +20,13 @@ const LoginPage = () => {
     setError('');
     try {
       const res = await loginUser({ email, password });
-      const welcome = res.data.message || `Welcome back!`;
-      setSuccessMessage(welcome);
-      // after showing welcome, redirect to services
+      const { token, message } = res.data;
+      // Persist token and welcome message
+      localStorage.setItem('token', token);
+      localStorage.setItem('welcomeMessage', message);
+      // Update context
+      setUser({ token, message });
+      setSuccessMessage(message);
       setTimeout(() => navigate('/services'), 1500);
     } catch (err) {
       setError('Invalid credentials');
@@ -33,14 +39,15 @@ const LoginPage = () => {
       setError('Please select an image');
       return;
     }
-
     setError('');
     const formData = new FormData();
     formData.append('face_image', faceImage);
-
     try {
       const res = await loginUserFace(formData);
-      const message = res.data.message || 'Welcome back!';
+      const { token, message } = res.data;
+      localStorage.setItem('token', token);
+      localStorage.setItem('welcomeMessage', message);
+      setUser({ token, message });
       setSuccessMessage(message);
       setTimeout(() => navigate('/services'), 1500);
     } catch {
@@ -60,7 +67,7 @@ const LoginPage = () => {
         <h2>LOGIN</h2>
         {successMessage && <p className="success">{successMessage}</p>}
 
-        {mode === 'credentials' && (
+        {mode === 'credentials' ? (
           <form onSubmit={handleCredentialsLogin}>
             <input
               type="email"
@@ -81,9 +88,7 @@ const LoginPage = () => {
               Login
             </button>
           </form>
-        )}
-
-        {mode === 'face' && (
+        ) : (
           <form onSubmit={handleFaceLogin}>
             <input
               type="file"
