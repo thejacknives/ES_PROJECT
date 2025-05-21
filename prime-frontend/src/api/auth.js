@@ -27,10 +27,4 @@ export function list_services() {
   return api.get('/services/');
 }
 
-export function getAvailableSlots(date) {
-  return api.get(`/appointments/available-slots/?date=${date}`);
-}
-
-export function bookAppointment(data) {
-  return api.post('/appointments/book/', data);
-}
+export default api;

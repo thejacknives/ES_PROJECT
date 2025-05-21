@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './MakeAppointmentPage.css'; 
 import { list_services } from '../api/auth';
-import { getAvailableSlots, bookAppointment } from '../api/auth';
+import { getAvailableSlots, bookAppointment } from '../api/appointments';
 
 export default function MakeAppointmentPage() {
   const [services, setServices] = useState([]);
@@ -20,9 +20,20 @@ export default function MakeAppointmentPage() {
   // When date changes, fetch slots
   useEffect(() => {
     if (date) {
+      console.log("Fetching slots for date:", date);
       getAvailableSlots(date)
-        .then(res => setSlots(res.data))
-        .catch(() => setSlots([]));
+        .then(res => {
+          console.log("Received slots raw:", res.data);
+          // Backend returns { date: "...", available_slots: [ ... ] }
+          const data = Array.isArray(res.data.available_slots)
+            ? res.data.available_slots
+            : [];
+          setSlots(data);
+        })
+        .catch(err => {
+          console.error("Error fetching slots", err);
+          setSlots([]);
+        });
     } else {
       setSlots([]);
     }
@@ -38,6 +49,7 @@ export default function MakeAppointmentPage() {
       await bookAppointment({ service_id: serviceId, date, slot, urgent });
       setMessage('Appointment booked successfully!');
     } catch (err) {
+      console.error(err);
       setMessage('Failed to book appointment.');
     }
   };
@@ -49,7 +61,11 @@ export default function MakeAppointmentPage() {
         {/* Service selector */}
         <label>
           Service
-          <select value={serviceId} onChange={e => setServiceId(e.target.value)} required>
+          <select
+            value={serviceId}
+            onChange={e => setServiceId(e.target.value)}
+            required
+          >
             <option value="">— pick a service —</option>
             {services.map(s => (
               <option key={s.id} value={s.id}>
@@ -74,11 +90,21 @@ export default function MakeAppointmentPage() {
         {date && (
           <label>
             Available Slots
-            <select value={slot} onChange={e => setSlot(e.target.value)} required>
+            <select
+              value={slot}
+              onChange={e => setSlot(e.target.value)}
+              required
+            >
               <option value="">— select a time —</option>
-              {slots.map(t => (
-                <option key={t} value={t}>{t}</option>
-              ))}
+              {slots.length > 0 ? (
+                slots.map(t => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))
+              ) : (
+                <option disabled>No slots available</option>
+              )}
             </select>
           </label>
         )}
