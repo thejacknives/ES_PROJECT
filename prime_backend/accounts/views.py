@@ -55,10 +55,15 @@ def login_with_credentials(request):
     user = authenticate(request, email=email, password=password)
     if user:
         token = generate_jwt(user)
-        #return token in reponse and message
-        return Response({'token': token, 'message': f'Welcome back, {user.username}!'}, status=200)
+        # Return token, message, and user_id
+        return Response({
+            'token': token,
+            'user_id': user.id,
+            'message': f'Welcome back, {user.username}!'
+        }, status=200)
 
     return Response({'error': 'Invalid email or password'}, status=403)
+
 
 @api_view(['POST'])
 def login_with_face(request):
@@ -66,15 +71,12 @@ def login_with_face(request):
     if not face_image:
         return Response({'error': 'No face image uploaded'}, status=400)
 
-    # Upload to S3 with a temp key
     temp_key = f'faces/{uuid.uuid4()}.jpg'
     upload_image_to_s3(face_image, temp_key)
 
-    # Rekognition: search by image
     face_id = search_face_s3(temp_key)
     if not face_id:
         s3_client.delete_object(Bucket=bucket, Key=temp_key)
-
         return Response({'error': 'Face not recognized'}, status=403)
 
     try:
@@ -82,11 +84,16 @@ def login_with_face(request):
         s3_client.delete_object(Bucket=bucket, Key=temp_key)
 
         token = generate_jwt(user)
-        return Response({'token':token, 'message': f'Welcome back, {user.username}!'}, status=200)
+        # Return token, message, and user_id
+        return Response({
+            'token': token,
+            'user_id': user.id,
+            'message': f'Welcome back, {user.username}!'
+        }, status=200)
     except User.DoesNotExist:
         s3_client.delete_object(Bucket=bucket, Key=temp_key)
-
         return Response({'error': 'User not found for face ID'}, status=404)
+    
 #FOR TEST ONLY ---- IGNORE
 @api_view(["POST"])
 @csrf_exempt
