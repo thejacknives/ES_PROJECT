@@ -61,6 +61,7 @@ class Appointment(models.Model):
     service = models.ForeignKey(Service, on_delete=models.CASCADE)
     datetime = models.DateTimeField(unique=True)  # ensures no overlaps
     created_at = models.DateTimeField(auto_now_add=True)
+    urgency = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.user} - {self.service.name} at {self.datetime}"

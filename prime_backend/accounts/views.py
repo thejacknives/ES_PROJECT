@@ -124,7 +124,8 @@ def submit_repair_request(request):
     Appointment.objects.create(
         user_id=user_id,
         service=service,
-        datetime=appointment_datetime
+        datetime=appointment_datetime,
+        urgency=urgency
     )
 
     input_data = {
