@@ -99,7 +99,7 @@ def test_start_workflow(request):
 @api_view(['POST'])
 @permission_classes([IsAuthenticated])
 def submit_repair_request(request):
-    user_id = request.data.get(request.user.id)
+    user_id = request.user.id
     urgency = request.data.get("urgency", False)
     appointment_datetime = request.data.get("appointment_datetime")
     service_id = request.data.get("service_id")
