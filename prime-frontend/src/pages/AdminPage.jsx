@@ -51,7 +51,7 @@ export default function AdminPage() {
           <tr key={a.id}>
             <td>{a.id}</td>
             <td>{a.user_id}</td>
-            <td>{a.service_id}</td>
+            <td>{a.service}</td>
             <td>{new Date(a.datetime).toLocaleString()}</td>
             <td>{a.urgency ? 'Yes' : 'No'}</td>
             <td>{a.state}</td>

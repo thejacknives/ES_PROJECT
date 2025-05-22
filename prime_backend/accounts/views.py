@@ -110,12 +110,7 @@ def submit_repair_request(request):
     user_id = request.data.get("user_id")
     urgency = request.data.get("urgency", False)
     appointment_datetime = request.data.get("appointment_datetime")
-    service_id = request.data.get("service_id")
 
-    try:
-        service = Service.objects.get(id=service_id)
-    except Service.DoesNotExist:
-        return Response({"error": "Invalid service ID"}, status=400)
 
     if Appointment.objects.filter(datetime=appointment_datetime).exists():
         return Response({"error": "Time slot already booked"}, status=409)
@@ -123,7 +118,6 @@ def submit_repair_request(request):
     # Save appointment
     Appointment.objects.create(
         user_id=user_id,
-        service=service,
         datetime=appointment_datetime,
         urgency=urgency
     )
@@ -132,9 +126,6 @@ def submit_repair_request(request):
         "user_id": user_id,
         "urgency": urgency,
         "appointment_datetime": appointment_datetime,
-        "service_id": service_id,
-        "service_name": service.name,
-        "base_price": float(service.base_price),
         "customer_showed_up": True  # for testing
     }
 
