@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import register, login_with_credentials, login_with_face ,submit_approval, submit_payment, submit_pickup, submit_repair_request, test_start_workflow, list_services, available_slots, repair_started, repair_completed, list_appointments, list_started_appointments, list_ongoing_appointments, mark_appointment_ongoing
+from .views import register, login_with_credentials, login_with_face ,submit_approval, submit_payment, submit_pickup, submit_repair_request, test_start_workflow, list_services, available_slots, repair_started, repair_completed, list_appointments, list_started_appointments, list_ongoing_appointments, mark_appointment_ongoing, customer_showed_up
 
 urlpatterns = [
     path('register/', register),
@@ -18,4 +18,5 @@ urlpatterns = [
     path('workflow/started-appointments/', list_started_appointments),
     path('workflow/ongoing-appointments/', list_ongoing_appointments),
     path('workflow/check-ongoing/', mark_appointment_ongoing),
+    path('workflow/customer-showup/', customer_showed_up),
 ]
