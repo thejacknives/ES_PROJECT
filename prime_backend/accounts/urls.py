@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import register, login_with_credentials, login_with_face ,submit_approval, submit_payment, submit_pickup, submit_repair_request, test_start_workflow, list_services, available_slots, repair_started
+from .views import register, login_with_credentials, login_with_face ,submit_approval, submit_payment, submit_pickup, submit_repair_request, test_start_workflow, list_services, available_slots, repair_started, repair_ended
 
 urlpatterns = [
     path('register/', register),
@@ -13,5 +13,7 @@ urlpatterns = [
     path('services/', list_services),
     path('available-slots/', available_slots),
     path('workflow/repair/', repair_started),
+    path('workflow/repair-ended/', repair_ended),
+
 
 ]

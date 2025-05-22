@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .serializers import RegisterSerializer, ServiceSerializer
+from .serializers import RegisterSerializer, ServiceSerializer , AppointmentSerializer
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.decorators import api_view, permission_classes
 import uuid
@@ -279,3 +279,26 @@ def repair_started(request):
     })
 
     return Response(result)
+
+@api_view(['POST'])
+def repair_ended(request):
+    token = request.data.get('task_token')
+    ended = request.data.get('repair_ended', False)
+
+    result = invoke_lambda("HandleRepairEndedCallback", {
+        "taskToken": token,
+        "repair_ended": ended
+    })
+
+    return Response(result)
+
+@api_view(['GET'])
+def list_appointments(request):
+    appointments = Appointment.objects.all()
+    serializer = AppointmentSerializer(appointments, many=True)
+    return Response(serializer.data)
+
+
+
+
+

@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Service
+from .models import User, Service, Appointment
 from accounts.utils.aws import upload_image_to_s3, index_face_s3
 
 
@@ -37,3 +37,12 @@ class ServiceSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
         fields = ['id', 'name', 'base_price']
+
+
+
+class AppointmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Appointment
+        fields = ['id', 'user', 'service', 'date', 'time']
+
+
