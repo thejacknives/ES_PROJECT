@@ -9,6 +9,7 @@ import RegisterPage from './pages/RegisterPage';
 import ServicesPage from './pages/ServicesPage';
 import MakeAppointmentPage from './pages/MakeAppointmentPage';
 import RepairProgressPage from './pages/RepairProgressPage';
+import AdminPage from './pages/AdminPage';
 
 function App() {
   return (
@@ -35,6 +36,15 @@ function App() {
           element={
             <PrivateRoute>
               <RepairProgressPage />
+            </PrivateRoute>
+          }
+        />
+
+        <Route
+          path="/admin"
+          element={
+            <PrivateRoute>
+              <AdminPage />
             </PrivateRoute>
           }
         />

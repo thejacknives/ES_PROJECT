@@ -22,3 +22,7 @@ export function getAvailableSlots(date) {
 export function bookAppointment(data) {
   return api.post('/start-repair/', data);
 }
+
+export function listAllAppointments() {
+  return api.get('/list-appointments/');
+}

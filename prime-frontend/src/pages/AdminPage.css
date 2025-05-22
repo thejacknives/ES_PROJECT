@@ -1,0 +1,42 @@
+.admin-page {
+  padding: 4rem;
+  max-width: 1000px;
+  margin: 0 auto;
+  font-family: sans-serif;
+}
+
+.admin-page h1 {
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.admin-page section {
+  margin-bottom: 2rem;
+}
+
+.admin-page h2 {
+  color: #3f51b5;
+  margin-bottom: 1rem;
+}
+
+.admin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1rem;
+}
+
+.admin-table th,
+.admin-table td {
+  padding: 0.75rem;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+
+.admin-table th {
+  background: #f3f3f3;
+}
+
+.error {
+  color: #b00020;
+  text-align: center;
+}

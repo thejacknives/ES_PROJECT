@@ -26,7 +26,11 @@ export default function Header() {
           <Link to="/repair-progress">Repair Progress</Link>
           <div className="spacer" />
 
-          
+          {user?.user_id === 1 && (
+            <Link to="/admin" className="admin-link">
+              Admin Page
+            </Link>
+          )}
 
           {user ? (
             <button onClick={handleLogout} className="login-link">
