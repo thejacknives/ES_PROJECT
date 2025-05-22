@@ -15,7 +15,5 @@ urlpatterns = [
     path('workflow/repair-started/', repair_started),
     path('workflow/repair-completed/', repair_completed),
     path('list-appointments/', list_appointments),
-    path('workflow/started-appointments/', list_started_appointments),
-    path('workflow/ongoing-appointments/', list_ongoing_appointments),
     path('workflow/check-ongoing/', mark_appointment_ongoing),
 ]
