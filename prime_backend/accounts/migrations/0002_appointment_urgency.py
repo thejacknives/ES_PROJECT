@@ -14,5 +14,6 @@ class Migration(migrations.Migration):
             model_name='appointment',
             name='urgency',
             field=models.BooleanField(default=False),
+            
         ),
     ]
