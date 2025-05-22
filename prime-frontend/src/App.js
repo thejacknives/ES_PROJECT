@@ -8,6 +8,7 @@ import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import ServicesPage from './pages/ServicesPage';
 import MakeAppointmentPage from './pages/MakeAppointmentPage';
+import RepairProgressPage from './pages/RepairProgressPage';
 
 function App() {
   return (
@@ -15,12 +16,12 @@ function App() {
       <Header />
 
       <Routes>
-        {/* Public routes */}
+        {/* public */}
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/services" element={<ServicesPage />} />
 
-        {/* Only /make-appointment is protected */}
+        {/* protected */}
         <Route
           path="/make-appointment"
           element={
@@ -29,8 +30,16 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route
+          path="/repair-progress"
+          element={
+            <PrivateRoute>
+              <RepairProgressPage />
+            </PrivateRoute>
+          }
+        />
 
-        {/* Root: send to services */}
+        {/* fallback */}
         <Route path="/" element={<ServicesPage />} />
       </Routes>
     </Router>

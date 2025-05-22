@@ -6,6 +6,7 @@ import { AuthContext } from '../contexts/AuthContext';
 
 export default function Header() {
   const { user, logout } = useContext(AuthContext);
+  const userName = user?.message?.split(', ')[1]?.replace('!', '') || '';
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -22,9 +23,10 @@ export default function Header() {
           <Link to="/">Home</Link>
           <Link to="/services">Services</Link>
           <Link to="/make-appointment">Make Appointment</Link>
-          <Link to="/about">About</Link>
-          <Link to="/contact">Contact</Link>
+          <Link to="/repair-progress">Repair Progress</Link>
           <div className="spacer" />
+
+          
 
           {user ? (
             <button onClick={handleLogout} className="login-link">
@@ -34,6 +36,12 @@ export default function Header() {
             <Link to="/login" className="login-link">
               Login
             </Link>
+          )}
+
+          {user && (
+            <span className="user-name">
+              {userName}
+            </span>
           )}
         </nav>
       </div>

@@ -1,0 +1,129 @@
+/* RepairProgressPage.css */
+
+.repair-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 4rem;
+  text-align: center;
+  background: linear-gradient(to bottom right, #e9efff, #f3e9ff);
+  min-height: 100vh;
+  box-sizing: border-box;
+}
+
+.title {
+  font-size: 2.5rem;
+  color: #2b2d42;
+  margin-bottom: 2rem;
+}
+
+/* Progress Bar Container */
+.progress-container {
+  position: relative;
+  height: 24px;
+  margin-bottom: 3rem;
+}
+
+/* Gray background track */
+.progress-bar-bg {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 8px;
+  background: #d3d3d3;
+  border-radius: 4px;
+  transform: translateY(-50%);
+}
+
+/* Blue fill up to current step */
+.progress-bar-fill {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  height: 8px;
+  background: #3f51b5;
+  border-radius: 4px 0 0 4px;
+  transform: translateY(-50%);
+  transition: width 0.4s ease;
+}
+
+/* Step circles */
+.progress-steps {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 0;
+}
+
+.progress-step {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  margin-top: -8px;
+  margin-left: -8px;
+  border-radius: 50%;
+  background: #666;
+  transition: background 0.4s ease;
+}
+
+.progress-step.active {
+  background: #3f51b5;
+}
+
+/* Content for each step */
+.step-content {
+  max-width: 400px;
+  margin: 0 auto;
+  text-align: center;
+}
+
+.step-content h2 {
+  margin-bottom: 1rem;
+  color: #2b2d42;
+}
+
+.step-content p {
+  margin-bottom: 1.5rem;
+  color: #333;
+}
+
+/* Payment box styling */
+.payment-box {
+  display: inline-flex;
+  align-items: baseline;
+  background: white;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  margin-bottom: 1.5rem;
+}
+
+.payment-box .currency {
+  font-size: 1.25rem;
+  margin-right: 0.25rem;
+  color: #3f51b5;
+}
+
+.payment-box .amount {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #3f51b5;
+}
+
+/* Action button */
+.action-btn {
+  background: #3f51b5;
+  border: none;
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.action-btn:hover {
+  background: #303f9f;
+}

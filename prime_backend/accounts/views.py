@@ -273,7 +273,7 @@ def repair_started(request):
     token = request.data.get('task_token')
     started = request.data.get('repair_started', False)
 
-    result = invoke_lambda("HandleRepairStartedCallback", {
+    result = invoke_lambda("RepairInProgressFunction", {
         "taskToken": token,
         "repair_started": started
     })
@@ -281,13 +281,13 @@ def repair_started(request):
     return Response(result)
 
 @api_view(['POST'])
-def repair_ended(request):
+def repair_completed(request):
     token = request.data.get('task_token')
-    ended = request.data.get('repair_ended', False)
+    completed = request.data.get('repair_completed', False)
 
-    result = invoke_lambda("HandleRepairEndedCallback", {
+    result = invoke_lambda("RepairEndedFunction", {
         "taskToken": token,
-        "repair_ended": ended
+        "repair_completed": completed
     })
 
     return Response(result)
@@ -297,8 +297,3 @@ def list_appointments(request):
     appointments = Appointment.objects.all()
     serializer = AppointmentSerializer(appointments, many=True)
     return Response(serializer.data)
-
-
-
-
-
