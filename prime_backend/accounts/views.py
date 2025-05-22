@@ -273,9 +273,21 @@ def repair_started(request):
     token = request.data.get('task_token')
     started = request.data.get('repair_started', False)
 
-    result = invoke_lambda("HandleRepairStartedCallback", {
+    result = invoke_lambda("RepairInProgressFunction", {
         "taskToken": token,
         "repair_started": started
+    })
+
+    return Response(result)
+
+@api_view(['POST'])
+def repair_completed(request):
+    token = request.data.get('task_token')
+    completed = request.data.get('repair_completed', False)
+
+    result = invoke_lambda("RepairEndedFunction", {
+        "taskToken": token,
+        "repair_completed": completed
     })
 
     return Response(result)
