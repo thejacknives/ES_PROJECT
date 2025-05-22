@@ -8,10 +8,10 @@ export default function AdminPage() {
   const { user } = useContext(AuthContext);
   const [appointments, setAppointments] = useState([]);
   const [error, setError] = useState('');
+  const [view, setView] = useState('started'); // 'started' or 'past'
 
-  // Always declare hooks at top-level
+  // Fetch all appointments when the user is confirmed as admin
   useEffect(() => {
-    // Only fetch if logged in as user_id 1
     if (user && user.user_id === 1) {
       listAllAppointments()
         .then(res => setAppointments(res.data))
@@ -22,40 +22,40 @@ export default function AdminPage() {
     }
   }, [user]);
 
-  // Then conditionally redirect non-admins
+  // Redirect non-admin users
   if (!user || user.user_id !== 1) {
     return <Navigate to="/login" replace />;
   }
 
-  const now = new Date();
-  const ongoing = appointments.filter(a =>
-    new Date(a.appointment_datetime) >= now && !a.completed
-  );
-  const past = appointments.filter(a =>
-    new Date(a.appointment_datetime) < now || a.completed
-  );
+  // Split by state
+  const started = appointments.filter(a => a.state !== 'completed');
+  const past    = appointments.filter(a => a.state === 'completed');
+
+  const dataToShow = view === 'started' ? started : past;
 
   const renderTable = data => (
     <table className="admin-table">
       <thead>
         <tr>
           <th>ID</th>
-          <th>User</th>
-          <th>Service</th>
+          <th>User ID</th>
+          <th>Service ID</th>
           <th>Date & Time</th>
-          <th>Urgent</th>
-          <th>Completed</th>
+          <th>Urgency</th>
+          <th>State</th>
+          <th>Price</th>
         </tr>
       </thead>
       <tbody>
         {data.map(a => (
           <tr key={a.id}>
             <td>{a.id}</td>
-            <td>{a.user_name || a.user_id}</td>
-            <td>{a.service_name || a.service_id}</td>
-            <td>{new Date(a.appointment_datetime).toLocaleString()}</td>
+            <td>{a.user_id}</td>
+            <td>{a.service_id}</td>
+            <td>{new Date(a.datetime).toLocaleString()}</td>
             <td>{a.urgency ? 'Yes' : 'No'}</td>
-            <td>{a.completed ? 'Yes' : 'No'}</td>
+            <td>{a.state}</td>
+            <td>{a.price != null ? `€${a.price.toFixed(2)}` : '—'}</td>
           </tr>
         ))}
       </tbody>
@@ -67,14 +67,24 @@ export default function AdminPage() {
       <h1>Admin Dashboard</h1>
       {error && <p className="error">{error}</p>}
 
-      <section>
-        <h2>Ongoing Appointments</h2>
-        {ongoing.length ? renderTable(ongoing) : <p>No ongoing appointments.</p>}
-      </section>
+      <div className="view-switch">
+        <button
+          className={view === 'started' ? 'active' : ''}
+          onClick={() => setView('started')}
+        >
+          Started
+        </button>
+        <button
+          className={view === 'past' ? 'active' : ''}
+          onClick={() => setView('past')}
+        >
+          Past
+        </button>
+      </div>
 
       <section>
-        <h2>Past Appointments</h2>
-        {past.length ? renderTable(past) : <p>No past appointments.</p>}
+        <h2>{view === 'started' ? 'started Repair Processes' : 'Past Repair Processes'}</h2>
+        {dataToShow.length ? renderTable(dataToShow) : <p>No {view} appointments.</p>}
       </section>
     </div>
   );
