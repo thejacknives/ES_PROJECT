@@ -177,12 +177,11 @@ def submit_payment(request):
 def submit_pickup(request):
     token = request.data.get('task_token')
     picked = request.data.get('picked_up', False)
-    final_payment = request.data.get('final_payment', 0)
+    
 
     result = invoke_lambda("HandlePickupCallback", {
         "taskToken": token,
-        "picked_up": picked,
-        "final_payment": final_payment
+        "picked_up": picked
     })
     return Response(result)
 
@@ -269,3 +268,14 @@ def available_slots(request):
         "date": selected_date.strftime("%Y-%m-%d"),
         "available_slots": available
     })
+@api_view(['POST'])
+def repair_started(request):
+    token = request.data.get('task_token')
+    started = request.data.get('repair_started', False)
+
+    result = invoke_lambda("HandleRepairStartedCallback", {
+        "taskToken": token,
+        "repair_started": started
+    })
+
+    return Response(result)

@@ -21,6 +21,19 @@ s3_client = boto3.client('s3',
                         aws_session_token=os.getenv("aws_session_token"),
                         region_name=os.getenv('AWS_REGION_NAME'))
 
+
+stepfunctions_client = boto3.client('stepfunctions', 
+                                    aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+                                    aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+                                    aws_session_token=os.getenv("aws_session_token"),
+                                    region_name=os.getenv('AWS_REGION_NAME'))
+
+lambda_client = boto3.client('lambda',
+                            aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+                            aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+                            aws_session_token=os.getenv("aws_session_token"),
+                            region_name=os.getenv('AWS_REGION_NAME'))
+
 def upload_image_to_s3(image_file, s3_key):
     print("Uploading to S3...")
     s3_client.upload_fileobj(
@@ -58,7 +71,7 @@ def search_face_s3(s3_key):
         print("Error searching face:", e)
         return None
     
-lambda_client = boto3.client('lambda', region_name=region,)
+
 
 def invoke_lambda(function_name, payload):
     response = lambda_client.invoke(
@@ -70,8 +83,6 @@ def invoke_lambda(function_name, payload):
 
 
 
-# Initialize Step Functions client
-stepfunctions_client = boto3.client('stepfunctions', region_name=os.getenv("AWS_REGION_NAME"))
 
 def start_repair_workflow(input_data):
     """
