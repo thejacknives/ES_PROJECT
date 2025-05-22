@@ -171,6 +171,8 @@ def submit_payment(request):
     })
     return Response(result)
 
+
+
 #pickup callback
 #will do the pickup and final payment logic.
 @api_view(['POST'])
@@ -297,3 +299,39 @@ def list_appointments(request):
     appointments = Appointment.objects.all()
     serializer = AppointmentSerializer(appointments, many=True)
     return Response(serializer.data)
+
+
+
+@api_view(['GET'])
+def list_started_appointments(request):
+
+    appointments = Appointment.objects.filter(state='started').order_by('datetime')
+    serializer = AppointmentSerializer(appointments, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+def mark_appointment_ongoing(request):
+
+    appointment_id = request.data.get('appointment_id')
+
+    try:
+        appointment = Appointment.objects.get(id=appointment_id)
+        if appointment.state != 'started':
+            return Response({"error": "Appointment is not in 'started' state."}, status=400)
+
+        appointment.state = 'ongoing'
+        appointment.save()
+        return Response({"message": "Appointment marked as ongoing."})
+    except Appointment.DoesNotExist:
+        return Response({"error": "Appointment not found."}, status=404)
+
+
+@api_view(['GET'])
+def list_ongoing_appointments(request):
+
+    appointments = Appointment.objects.filter(state='ongoing').order_by('datetime')
+    serializer = AppointmentSerializer(appointments, many=True)
+    return Response(serializer.data)
+
+
