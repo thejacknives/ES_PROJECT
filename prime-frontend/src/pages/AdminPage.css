@@ -19,6 +19,22 @@
   margin-bottom: 1rem;
 }
 
+.view-switch button {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  background: white;
+  color: #333;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.4s ease;
+}
+
+.view-switch .active {
+  background: #3b82f6;
+  color: white;
+}
+
 .admin-table {
   width: 100%;
   border-collapse: collapse;

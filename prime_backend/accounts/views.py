@@ -335,3 +335,14 @@ def list_ongoing_appointments(request):
     return Response(serializer.data)
 
 
+@api_view(['POST'])
+def customer_showed_up(request):
+    token = request.data.get('task_token')
+    showed_up = request.data.get('customer_showed_up', False)
+
+    result = invoke_lambda("HandleCustomerShowedUpCallback", {
+        "taskToken": token,
+        "customer_showed_up": showed_up
+    })
+
+    return Response(result)
