@@ -139,49 +139,6 @@ def submit_repair_request(request):
 
 
 
-#for the approval callback
-# This is the callback that will be invoked by the Step Function 
-# when the customer approves or rejects the repair request.
-# It will be called from the Step Function
-@api_view(['POST'])
-def submit_approval(request):
-    token = request.data.get('task_token')
-    approved = request.data.get('customer_approved', False)
-
-    result = invoke_lambda("HandleApprovalCallback", {
-        "taskToken": token,
-        "customer_approved": approved
-    })
-
-    return Response(result)
-
-#payment callback
-@api_view(['POST'])
-def submit_payment(request):
-    token = request.data.get('task_token')
-    paid = request.data.get('payment_received', False)
-
-    result = invoke_lambda("HandlePaymentCallback", {
-        "taskToken": token,
-        "payment_received": paid
-    })
-    return Response(result)
-
-
-
-#pickup callback
-#will do the pickup and final payment logic.
-@api_view(['POST'])
-def submit_pickup(request):
-    token = request.data.get('task_token')
-    picked = request.data.get('picked_up', False)
-    
-
-    result = invoke_lambda("HandlePickupCallback", {
-        "taskToken": token,
-        "picked_up": picked
-    })
-    return Response(result)
 
 
 
@@ -266,29 +223,7 @@ def available_slots(request):
         "date": selected_date.strftime("%Y-%m-%d"),
         "available_slots": available
     })
-@api_view(['POST'])
-def repair_started(request):
-    token = request.data.get('task_token')
-    started = request.data.get('repair_started', False)
 
-    result = invoke_lambda("RepairInProgressFunction", {
-        "taskToken": token,
-        "repair_started": started
-    })
-
-    return Response(result)
-
-@api_view(['POST'])
-def repair_completed(request):
-    token = request.data.get('task_token')
-    completed = request.data.get('repair_completed', False)
-
-    result = invoke_lambda("RepairEndedFunction", {
-        "taskToken": token,
-        "repair_completed": completed
-    })
-
-    return Response(result)
 
 @api_view(['GET'])
 def list_appointments(request):
@@ -376,3 +311,132 @@ def customer_showed_up(request):
     
     except Exception as e:
         return Response({"error": str(e)}, status=500)
+    
+
+
+@api_view(['POST'])
+def submit_payment(request):
+    appointment_id = request.data.get('appointment_id')
+    paid = request.data.get('payment_received', False)
+
+    if not appointment_id:
+        return Response({"error": "appointment_id is required."}, status=400)
+    
+    try:
+        response = table.get_item(Key={'appointment_id': appointment_id})
+        token = response.get('Item', {}).get('task_token')
+        if not token:
+            return Response({'error': 'Task token not found'}, status=404)
+
+        stepfunctions_client.send_task_success(
+            taskToken=token,
+            output=json.dumps({"payment_received": paid})
+        )
+
+        return Response({"message": "Payment callback sent successfully."})
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+@api_view(['POST'])
+def submit_approval(request):
+    appointment_id = request.data.get('appointment_id')
+    approved = request.data.get('customer_approved', False)
+
+    if not appointment_id:
+        return Response({"error": "appointment_id is required."}, status=400)
+    
+    try:
+        
+        response = table.get_item(Key={'appointment_id': appointment_id})
+        token = response.get('Item', {}).get('task_token')
+        if not token:
+            return Response({'error': 'Task token not found'}, status=404)
+
+        stepfunctions_client.send_task_success(
+            taskToken=token,
+            output=json.dumps({"customer_approved": approved})
+        )
+
+        return Response({"message": "Approval callback sent successfully."})
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+
+
+@api_view(['POST'])
+def repair_started(request):
+    appointment_id = request.data.get('appointment_id')
+    repair_started = request.data.get('repair_started', True)
+
+    if not appointment_id:
+        return Response({"error": "appointment_id is required."}, status=400)
+    
+    try:
+        
+        response = table.get_item(Key={'appointment_id': appointment_id})
+        token = response.get('Item', {}).get('task_token')
+        if not token:
+            return Response({'error': 'Task token not found'}, status=404)
+
+        stepfunctions_client.send_task_success(
+            taskToken=token,
+            output=json.dumps({"repair_started": repair_started})
+        )
+
+        return Response({"message": "Repair started callback sent successfully."})
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+    
+@api_view(['POST'])
+def repair_completed(request):
+    appointment_id = request.data.get('appointment_id')
+    repair_completed = request.data.get('repair_completed', False)
+
+    if not appointment_id:
+        return Response({"error": "appointment_id is required."}, status=400)
+    
+    try:
+        response = table.get_item(Key={'appointment_id': appointment_id})
+        token = response.get('Item', {}).get('task_token')
+        if not token:
+            return Response({'error': 'Task token not found'}, status=404)
+
+        stepfunctions_client.send_task_success(
+            taskToken=token,
+            output=json.dumps({"repair_completed": repair_completed})
+        )   
+
+        return Response({"message": "Repair completed callback sent successfully."})
+
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+    
+
+#pickup callback
+#will do the pickup and final payment logic.
+@api_view(['POST'])
+def submit_pickup(request):
+    appointment_id = request.data.get('appointment_id')
+    picked_up= request.data.get('picked_up', False)
+
+    if not appointment_id:
+        return Response({"error": "appointment_id is required."}, status=400)
+    
+    try:
+        response = table.get_item(Key={'appointment_id': appointment_id})
+        token = response.get('Item', {}).get('task_token')
+        if not token:
+            return Response({'error': 'Task token not found'}, status=404)
+
+        stepfunctions_client.send_task_success(
+            taskToken=token,
+            output=json.dumps({"picked_up": picked_up})
+        )
+
+        return Response({"message": "Pickup callback sent successfully."})
+    
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
+    
