@@ -27,6 +27,6 @@ export function listAllAppointments() {
   return api.get('/list-appointments/');
 }
 
-export function customer_showed_up(appointment_id) {
-  return api.post('/customer-showed-up/', { appointment_id });
+export function customer_showed_up(appointment_id, showed_up) {
+  return api.post('workflow/customer-showup/', { appointment_id, customer_showed_up: showed_up });
 }

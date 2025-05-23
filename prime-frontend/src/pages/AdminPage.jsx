@@ -107,9 +107,15 @@ export default function AdminPage() {
           <div className="popup">
             <button
               className="popup-button"
-              onClick={() => customer_showed_up(selectedApp.id)}
+              onClick={() => customer_showed_up(selectedApp.id, true)}
             >
-              Mark Customer Shown
+              Customer Showed Up
+            </button>
+            <button
+              className="popup-button"
+              onClick={() => customer_showed_up(selectedApp.id, false)}
+            >
+              Customer Did Not Show
             </button>
             <button
               className="popup-button"
