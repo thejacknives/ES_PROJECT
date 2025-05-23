@@ -26,3 +26,7 @@ export function bookAppointment(data) {
 export function listAllAppointments() {
   return api.get('/list-appointments/');
 }
+
+export function customer_showed_up(appointment_id) {
+  return api.post('/customer-showed-up/', { appointment_id });
+}
