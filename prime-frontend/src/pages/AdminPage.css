@@ -56,3 +56,42 @@
   color: #b00020;
   text-align: center;
 }
+
+.manage-btn {
+  padding: 5px 5px;
+  border-radius: 6px;
+  border: none;
+  background: #3b82f6;
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.4s ease;
+}
+
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+
+  /* flex‐box centering */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  z-index: 1000;
+}
+
+.popup {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  max-width: 400px;
+  width: 80%;
+  text-align: center;
+  position: relative; /* above overlay */
+  z-index: 1001;
+}

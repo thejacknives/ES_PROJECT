@@ -9,6 +9,7 @@ export default function AdminPage() {
   const [appointments, setAppointments] = useState([]);
   const [error, setError] = useState('');
   const [view, setView] = useState('started'); // 'started' or 'past'
+  const [showPopup, setShowPopup] = useState(false);
 
   useEffect(() => {
     if (user?.user_id === 1) {
@@ -25,8 +26,8 @@ export default function AdminPage() {
     return <Navigate to="/login" replace />;
   }
 
-  const started = appointments.filter(a => a.state !== 'completed');
-  const past    = appointments.filter(a => a.state === 'completed');
+  const started = appointments.filter(a => a.state !== 'Ended');
+  const past    = appointments.filter(a => a.state === 'Ended');
   const dataToShow = view === 'started' ? started : past;
 
   const renderTable = data => (
@@ -39,7 +40,7 @@ export default function AdminPage() {
           <th>Date & Time</th>
           <th>Urgency</th>
           <th>State</th>
-          <th>Price</th>
+          <th>Manage</th>
         </tr>
       </thead>
       <tbody>
@@ -52,10 +53,12 @@ export default function AdminPage() {
             <td>{a.urgency ? 'Yes' : 'No'}</td>
             <td>{a.state.charAt(0).toUpperCase() + a.state.slice(1)}</td>
             <td>
-              {a.price != null
-                ? `€${parseFloat(a.price).toFixed(2)}`
-                : '—'
-              }
+              <button
+                className="manage-btn"
+                onClick={() => setShowPopup(true)}
+              >
+                Manage
+              </button>
             </td>
           </tr>
         ))}
@@ -94,6 +97,19 @@ export default function AdminPage() {
           : <p>No {view} appointments.</p>
         }
       </section>
+
+      {showPopup && (
+        <div className="popup-overlay">
+          <div className="popup">
+            <button
+              className="popup-button"
+              onClick={() => setShowPopup(false)}
+            >
+              Close
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
