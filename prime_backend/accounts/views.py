@@ -109,8 +109,10 @@ def test_start_workflow(request):
 @api_view(['POST'])
 def submit_repair_request(request):
     user_id = request.data.get("user_id")
+    service = request.data.get("service")
     urgency = request.data.get("urgency", False)
     appointment_datetime = request.data.get("appointment_datetime")
+    
 
 
     if Appointment.objects.filter(datetime=appointment_datetime).exists():
@@ -119,15 +121,17 @@ def submit_repair_request(request):
     # Save appointment
     Appointment.objects.create(
         user_id=user_id,
+        service=service,
         datetime=appointment_datetime,
         urgency=urgency
     )
-
+   
     input_data = {
         "user_id": user_id,
         "urgency": urgency,
         "appointment_datetime": appointment_datetime,
-        "customer_showed_up": True  # for testing
+        "customer_showed_up": True,  # for testing
+        "service": service
     }
 
     response = start_repair_workflow(input_data)

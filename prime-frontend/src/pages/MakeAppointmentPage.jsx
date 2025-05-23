@@ -5,90 +5,65 @@ import { getAvailableSlots, bookAppointment } from '../api/appointments';
 import { AuthContext } from '../contexts/AuthContext';
 
 export default function MakeAppointmentPage() {
-  const { user } = useContext(AuthContext); // user now contains { token, message, user_id }
+  const { user } = useContext(AuthContext);
   const [services, setServices]   = useState([]);
-  const [serviceId, setServiceId] = useState('');
+  const [serviceName, setServiceName] = useState('');
   const [date, setDate]           = useState('');
   const [slots, setSlots]         = useState([]);
   const [slot, setSlot]           = useState('');
   const [urgency, setUrgency]     = useState(false);
   const [message, setMessage]     = useState('');
 
-  // Load services on mount
   useEffect(() => {
     list_services()
       .then(res => setServices(res.data))
-      .catch(err => console.error('Error loading services', err));
+      .catch(console.error);
   }, []);
 
-  // When date changes, fetch slots
   useEffect(() => {
-    if (date) {
-      getAvailableSlots(date)
-        .then(res => {
-          const arr = Array.isArray(res.data.available_slots)
-            ? res.data.available_slots
-            : [];
-          setSlots(arr);
-        })
-        .catch(err => {
-          console.error('Error fetching slots', err);
-          setSlots([]);
-        });
-    } else {
-      setSlots([]);
-    }
+    if (!date) return setSlots([]);
+    getAvailableSlots(date)
+      .then(res => {
+        setSlots(Array.isArray(res.data.available_slots) ? res.data.available_slots : []);
+      })
+      .catch(console.error);
   }, [date]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!serviceId || !date || !slot) {
-      setMessage('Please select service, date, and slot.');
-      return;
+    if (!serviceName || !date || !slot) {
+      return setMessage('Please select service, date, and slot.');
     }
-    if (!user?.user_id) {
-      setMessage('User ID not found. Please log in again.');
-      return;
-    }
-
-    // Build ISO datetime string
-    const appointment_datetime = `${date}T${slot}:00Z`;
-
     const payload = {
-      user_id:            user.user_id,
-      service_id:         serviceId,
-      appointment_datetime,
-      urgency:            urgency,
+      user_id: user.user_id,
+      service: serviceName,
+      appointment_datetime: `${date}T${slot}:00Z`,
+      urgency,
       customer_showed_up: true,
     };
-
     try {
       await bookAppointment(payload);
       setMessage('Appointment booked successfully!');
     } catch (err) {
-      console.error('Booking error:', err.response?.status, err.response?.data);
-      const serverMsg =
-        err.response?.data?.detail ||
-        err.response?.data?.message ||
-        'Failed to book appointment.';
-      setMessage(serverMsg);
+      console.error(err);
+      setMessage('Failed to book appointment.');
     }
   };
 
   return (
     <div className="appoint-page">
       <h1>Make an Appointment</h1>
-      <form className="appoint-form" onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit} className="appoint-form">
         <label>
           Service
           <select
-            value={serviceId}
-            onChange={e => setServiceId(e.target.value)}
+            value={serviceName}
+            onChange={e => setServiceName(e.target.value)}
             required
           >
             <option value="">— pick a service —</option>
             {services.map(s => (
-              <option key={s.id} value={s.id}>
+              <option key={s.id} value={s.name}>
                 {s.name} (€{parseFloat(s.base_price).toFixed(2)})
               </option>
             ))}
@@ -114,15 +89,9 @@ export default function MakeAppointmentPage() {
               required
             >
               <option value="">— select a time —</option>
-              {slots.length > 0 ? (
-                slots.map(t => (
-                  <option key={t} value={t}>
-                    {t}
-                  </option>
-                ))
-              ) : (
-                <option disabled>No slots available</option>
-              )}
+              {slots.length
+                ? slots.map(t => <option key={t} value={t}>{t}</option>)
+                : <option disabled>No slots available</option>}
             </select>
           </label>
         )}
