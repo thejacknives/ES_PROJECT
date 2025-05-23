@@ -55,7 +55,7 @@ class Migration(migrations.Migration):
                 ('urgency', models.BooleanField(default=False)),
                 ('state', models.CharField(default='started', max_length=50)),
                 ('price', models.DecimalField(decimal_places=2, default=0.0, max_digits=10)),
-                ('service', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='accounts.service')),
+                ('service', models.CharField(max_length=100)),
                 ('user', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to=settings.AUTH_USER_MODEL)),
             ],
         ),
