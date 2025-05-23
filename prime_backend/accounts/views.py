@@ -112,6 +112,8 @@ def submit_repair_request(request):
     service = request.data.get("service")
     urgency = request.data.get("urgency", False)
     appointment_datetime = request.data.get("appointment_datetime")
+    customer_showed_up = request.data.get("customer_showed_up", False)
+    appointment_id = request.data.get("appointment_id")
     
 
 
@@ -128,10 +130,11 @@ def submit_repair_request(request):
    
     input_data = {
         "user_id": user_id,
+        "service": service,
         "urgency": urgency,
         "appointment_datetime": appointment_datetime,
-        "customer_showed_up": True,  # for testing
-        "service": service
+        "customer_showed_up": customer_showed_up,  
+        "appointment_id": appointment_id
     }
 
     response = start_repair_workflow(input_data)
