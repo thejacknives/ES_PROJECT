@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
-import { listAllAppointments } from '../api/appointments';  // point to appointments.js
+import { listAllAppointments, customer_showed_up } from '../api/appointments';  // point to appointments.js
 import './AdminPage.css';
 
 export default function AdminPage() {
@@ -10,6 +10,7 @@ export default function AdminPage() {
   const [error, setError] = useState('');
   const [view, setView] = useState('started'); // 'started' or 'past'
   const [showPopup, setShowPopup] = useState(false);
+  const [selectedApp, setSelectedApp] = useState(null);
 
   useEffect(() => {
     if (user?.user_id === 1) {
@@ -55,7 +56,10 @@ export default function AdminPage() {
             <td>
               <button
                 className="manage-btn"
-                onClick={() => setShowPopup(true)}
+                onClick={() => {
+                  setSelectedApp(a);
+                  setShowPopup(true);
+                }}
               >
                 Manage
               </button>
@@ -98,9 +102,15 @@ export default function AdminPage() {
         }
       </section>
 
-      {showPopup && (
+      {showPopup && selectedApp && (
         <div className="popup-overlay">
           <div className="popup">
+            <button
+              className="popup-button"
+              onClick={() => customer_showed_up(selectedApp.id)}
+            >
+              Mark Customer Shown
+            </button>
             <button
               className="popup-button"
               onClick={() => setShowPopup(false)}
