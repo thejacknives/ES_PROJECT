@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useContext } from 'react';
 import { Navigate } from 'react-router-dom';
 import { AuthContext } from '../contexts/AuthContext';
-import { listAllAppointments } from '../api/appointments';
+import { listAllAppointments } from '../api/appointments';  // point to appointments.js
 import './AdminPage.css';
 
 export default function AdminPage() {
@@ -10,9 +10,8 @@ export default function AdminPage() {
   const [error, setError] = useState('');
   const [view, setView] = useState('started'); // 'started' or 'past'
 
-  // Fetch all appointments when the user is confirmed as admin
   useEffect(() => {
-    if (user && user.user_id === 1) {
+    if (user?.user_id === 1) {
       listAllAppointments()
         .then(res => setAppointments(res.data))
         .catch(err => {
@@ -22,15 +21,12 @@ export default function AdminPage() {
     }
   }, [user]);
 
-  // Redirect non-admin users
-  if (!user || user.user_id !== 1) {
+  if (user?.user_id !== 1) {
     return <Navigate to="/login" replace />;
   }
 
-  // Split by state
   const started = appointments.filter(a => a.state !== 'completed');
   const past    = appointments.filter(a => a.state === 'completed');
-
   const dataToShow = view === 'started' ? started : past;
 
   const renderTable = data => (
@@ -39,7 +35,7 @@ export default function AdminPage() {
         <tr>
           <th>ID</th>
           <th>User ID</th>
-          <th>Service ID</th>
+          <th>Service</th>
           <th>Date & Time</th>
           <th>Urgency</th>
           <th>State</th>
@@ -50,12 +46,17 @@ export default function AdminPage() {
         {data.map(a => (
           <tr key={a.id}>
             <td>{a.id}</td>
-            <td>{a.user_id}</td>
+            <td>{a.user_id}</td>        {/* fixed from a.user */}
             <td>{a.service}</td>
             <td>{new Date(a.datetime).toLocaleString()}</td>
             <td>{a.urgency ? 'Yes' : 'No'}</td>
-            <td>{a.state}</td>
-            <td>{a.price != null ? `€${a.price.toFixed(2)}` : '—'}</td>
+            <td>{a.state.charAt(0).toUpperCase() + a.state.slice(1)}</td>
+            <td>
+              {a.price != null
+                ? `€${parseFloat(a.price).toFixed(2)}`
+                : '—'
+              }
+            </td>
           </tr>
         ))}
       </tbody>
@@ -83,8 +84,15 @@ export default function AdminPage() {
       </div>
 
       <section>
-        <h2>{view === 'started' ? 'started Repair Processes' : 'Past Repair Processes'}</h2>
-        {dataToShow.length ? renderTable(dataToShow) : <p>No {view} appointments.</p>}
+        <h2>
+          {view === 'started'
+            ? 'Started Repair Processes'
+            : 'Past Repair Processes'}
+        </h2>
+        {dataToShow.length
+          ? renderTable(dataToShow)
+          : <p>No {view} appointments.</p>
+        }
       </section>
     </div>
   );

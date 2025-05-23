@@ -56,7 +56,7 @@ export default function MakeAppointmentPage() {
 
     const payload = {
       user_id:            user.user_id,
-      service_id:         parseInt(serviceId, 10),
+      service_id:         serviceId,
       appointment_datetime,
       urgency:            urgency,
       customer_showed_up: true,
