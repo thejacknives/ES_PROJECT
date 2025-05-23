@@ -306,8 +306,20 @@ def customer_showed_up(request):
             taskToken=token,
             output=json.dumps({"customer_showed_up": showed_up})
         )
+        # Update the appointment state in the RDS database
+        try:
+            appointment = Appointment.objects.get(id=appointment_id)
+            if showed_up:
+                appointment.state = "Payment"
+                appointment.save()
+            else:
+                appointment.state = "No show"
+                appointment.save()
+        except Appointment.DoesNotExist:
+            return Response({"error": "Appointment not found."}, status=404)
 
-        return Response({"message": "Step Function callback sent successfully."})
+        return Response({"message": "Step Function callback sent successfully and state updated."})
+
     
     except Exception as e:
         return Response({"error": str(e)}, status=500)
@@ -333,6 +345,18 @@ def submit_payment(request):
             output=json.dumps({"payment_received": paid})
         )
 
+        try:
+            appointment = Appointment.objects.get(id=appointment_id)
+            if paid:
+                appointment.state = "Approval"
+                appointment.save()
+            else:
+                appointment.state = "Payment failed"
+                appointment.save()
+        except Appointment.DoesNotExist:
+            return Response({"error": "Appointment not found."}, status=404)
+
+
         return Response({"message": "Payment callback sent successfully."})
 
     except Exception as e:
@@ -357,6 +381,18 @@ def submit_approval(request):
             taskToken=token,
             output=json.dumps({"customer_approved": approved})
         )
+
+        try:
+            appointment = Appointment.objects.get(id=appointment_id)
+            if approved:
+                appointment.state = "Repair started"
+                appointment.save()
+            else:
+                appointment.state = "Approval failed"
+                appointment.save()
+        except Appointment.DoesNotExist:
+            return Response({"error": "Appointment not found."}, status=404)
+
 
         return Response({"message": "Approval callback sent successfully."})
 
@@ -384,6 +420,18 @@ def repair_started(request):
             output=json.dumps({"repair_started": repair_started})
         )
 
+        try:
+            appointment = Appointment.objects.get(id=appointment_id)
+            if repair_started:
+                appointment.state = "Repair completed"
+                appointment.save()
+            else:
+                appointment.state = "Repair failed"
+                appointment.save()
+        except Appointment.DoesNotExist:
+            return Response({"error": "Appointment not found."}, status=404)
+
+
         return Response({"message": "Repair started callback sent successfully."})
 
     except Exception as e:
@@ -407,6 +455,18 @@ def repair_completed(request):
             taskToken=token,
             output=json.dumps({"repair_completed": repair_completed})
         )   
+
+        try:
+            appointment = Appointment.objects.get(id=appointment_id)
+            if repair_completed:
+                appointment.state = "Pickup"
+                appointment.save()
+            else:
+                appointment.state = "Repair failed"
+                appointment.save()
+        except Appointment.DoesNotExist:
+            return Response({"error": "Appointment not found."}, status=404)
+
 
         return Response({"message": "Repair completed callback sent successfully."})
 
@@ -434,6 +494,18 @@ def submit_pickup(request):
             taskToken=token,
             output=json.dumps({"picked_up": picked_up})
         )
+
+        try:
+            appointment = Appointment.objects.get(id=appointment_id)
+            if picked_up:
+                appointment.state = "Ended"
+                appointment.save()
+            else:
+                appointment.state = "Pickup failed"
+                appointment.save()
+        except Appointment.DoesNotExist:
+            return Response({"error": "Appointment not found."}, status=404)
+
 
         return Response({"message": "Pickup callback sent successfully."})
     
