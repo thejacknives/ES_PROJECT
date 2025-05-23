@@ -38,8 +38,7 @@ export default function MakeAppointmentPage() {
       user_id: user.user_id,
       service: serviceName,
       appointment_datetime: `${date}T${slot}:00Z`,
-      urgency,
-      customer_showed_up: true,
+      urgency
     };
     try {
       await bookAppointment(payload);
