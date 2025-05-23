@@ -15,7 +15,8 @@ from accounts.utils.aws import start_repair_workflow  # You already have this
 from django.views.decorators.csrf import csrf_exempt
 import json
 from datetime import datetime, timedelta, time
-
+import boto3
+import os
 
 @api_view(['POST'])
 def login_with_face(request):
@@ -326,14 +327,48 @@ def list_ongoing_appointments(request):
     return Response(serializer.data)
 
 
+
+
+dynamodb = boto3.resource('dynamodb',aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+                            aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+                            aws_session_token=os.getenv("aws_session_token"),
+                            region_name=os.getenv('AWS_REGION_NAME'))  
+table = dynamodb.Table('Tokens') 
+
+
+stepfunctions_client = boto3.client('stepfunctions',aws_access_key_id=os.getenv('AWS_ACCESS_KEY_ID'),
+                            aws_secret_access_key=os.getenv('AWS_SECRET_ACCESS_KEY'),
+                            aws_session_token=os.getenv("aws_session_token"),
+                            region_name=os.getenv('AWS_REGION_NAME'))
+
+
+
+
 @api_view(['POST'])
 def customer_showed_up(request):
-    token = request.data.get('task_token')
+    appointment_id = request.data.get('appointment_id')
     showed_up = request.data.get('customer_showed_up', False)
 
-    result = invoke_lambda("HandleCustomerShowedUpCallback", {
-        "taskToken": token,
-        "customer_showed_up": showed_up
-    })
+    if not appointment_id:
+        return Response({"error": "appointment_id is required."}, status=400)
 
-    return Response(result)
+    try:
+        # Fetch task token from DynamoDB
+        response = table.get_item(Key={'appointment_id': appointment_id})
+        item = response.get('Item')
+        if not item or 'task_token' not in item:
+            return Response({"error": "Task token not found for this appointment."}, status=404)
+
+        token = item['task_token']
+
+        # Send the callback to Step Functions
+        
+        stepfunctions_client.send_task_success(
+            taskToken=token,
+            output=json.dumps({"customer_showed_up": showed_up})
+        )
+
+        return Response({"message": "Step Function callback sent successfully."})
+    
+    except Exception as e:
+        return Response({"error": str(e)}, status=500)
