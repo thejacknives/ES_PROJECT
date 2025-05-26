@@ -30,3 +30,19 @@ export function listAllAppointments() {
 export function customer_showed_up(appointment_id, showed_up) {
   return api.post('workflow/customer-showup/', { appointment_id, customer_showed_up: showed_up });
 }
+
+export function submit_payment(appointment_id, payment_data) {
+  return api.post('workflow/submit-payment/', { appointment_id, payment_data });
+}
+
+export function submit_approval(appointment_id, approval_data) {
+  return api.post('workflow/submit-approval/', { appointment_id, approval_data });
+}
+
+export function repair_started(appointment_id, start) {
+  return api.post('workflow/repair-started/', { appointment_id, repair_started: start });
+}
+
+export function repair_completed(appointment_id) {
+  return api.post('workflow/repair-completed/', { appointment_id });
+}
