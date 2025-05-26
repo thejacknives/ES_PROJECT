@@ -105,3 +105,27 @@
   cursor: pointer;
   margin-bottom: 1rem;
 }
+
+.popup-feedback.success {
+  margin: 1rem 0;
+  color: #00695c;
+  background: #e8f5e9;
+  padding: 0.5rem;
+  border-radius: 4px;
+  text-align: center;
+}
+
+.popup-feedback.error {
+  margin: 1rem 0;
+  color: #c62828;
+  background: #ffebee;
+  padding: 0.5rem;
+  border-radius: 4px;
+  text-align: center;
+}
+
+/* Make sure Close button sits apart */
+.popup-button.close-btn {
+  margin-top: 1rem;
+  background: #6c757d;
+}
