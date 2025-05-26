@@ -79,7 +79,7 @@ export default function AdminPage() {
 
   // modal action for “repair completed”
   const handleRepairComplete = () => {
-    repair_completed(selectedApp.id)
+    repair_completed(selectedApp.id, true)
       .then(() => {
         setPopupMsg({ type: 'success', text: 'Repair marked completed.' });
         fetchAppointments();

@@ -43,6 +43,6 @@ export function repair_started(appointment_id, start) {
   return api.post('workflow/repair-started/', { appointment_id, repair_started: start });
 }
 
-export function repair_completed(appointment_id) {
-  return api.post('workflow/repair-completed/', { appointment_id });
+export function repair_completed(appointment_id, complete) {
+  return api.post('workflow/repair-completed/', { appointment_id, repair_completed: complete });
 }
