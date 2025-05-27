@@ -1,0 +1,40 @@
+.my-repairs-page {
+  max-width: 600px;
+  margin: auto;
+  padding: 4rem;
+  font-family: sans-serif;
+}
+
+.my-repairs-page h1 {
+  text-align: center;
+  margin-bottom: 1.5rem;
+}
+
+.error {
+  color: #b00020;
+  text-align: center;
+}
+
+.repair-list {
+  list-style: none;
+  padding: 0;
+}
+
+.repair-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 1rem;
+  margin-bottom: 1rem;
+}
+
+.view-btn {
+  background: #3b82f6;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  cursor: pointer;
+}

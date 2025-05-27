@@ -1,4 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
+import { useParams } from 'react-router-dom';
+import { submit_payment, repair_started, repair_completed } from '../api/appointments';
 import './RepairProgressPage.css';
 
 const steps = [
@@ -12,6 +14,27 @@ const steps = [
 export default function RepairProgressPage() {
   const [currentStep, setCurrentStep] = useState(0);
   const amountDue = 30.0;
+  const { appointmentId } = useParams();
+  const [stage, setStage]   = useState('Payment');    // current step
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState('');
+
+
+  const handlePayment = async () => {
+    setLoading(true);
+    setError('');
+    try {
+      // Pass appointmentId and a `true` flag for payment_received
+      console.log('About to pay for appointment:', appointmentId);
+      await submit_payment(appointmentId, true);
+      setStage('RepairStarted');
+    } catch (e) {
+      console.error(e);
+      setError('Payment failed. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -24,7 +47,13 @@ export default function RepairProgressPage() {
               <span className="currency">€</span>
               <span className="amount">{amountDue.toFixed(2)}</span>
             </div>
-            <button onClick={() => setCurrentStep(1)} className="action-btn">
+            <button
+              onClick={async () => {
+              handlePayment();
+              setCurrentStep(1);
+              }}
+              className="action-btn"
+            >
               Pay Now
             </button>
           </div>

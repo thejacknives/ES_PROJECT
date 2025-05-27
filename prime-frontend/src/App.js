@@ -10,6 +10,7 @@ import ServicesPage from './pages/ServicesPage';
 import MakeAppointmentPage from './pages/MakeAppointmentPage';
 import RepairProgressPage from './pages/RepairProgressPage';
 import AdminPage from './pages/AdminPage';
+import MyRepairsPage from './pages/MyRepairsPage';
 
 function App() {
   return (
@@ -31,13 +32,10 @@ function App() {
             </PrivateRoute>
           }
         />
+        <Route path="/my-repairs" element={<MyRepairsPage />} />
         <Route
-          path="/repair-progress"
-          element={
-            <PrivateRoute>
-              <RepairProgressPage />
-            </PrivateRoute>
-          }
+          path="/repair-progress/:appointmentId"
+          element={<RepairProgressPage />}
         />
 
         <Route
