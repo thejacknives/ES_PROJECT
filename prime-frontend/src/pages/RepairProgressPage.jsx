@@ -1,6 +1,8 @@
-import React, { useState, useEffect} from 'react';
-import { useParams } from 'react-router-dom';
-import { submit_payment, repair_started, repair_completed } from '../api/appointments';
+// src/pages/RepairProgressPage.jsx
+import React, { useState, useEffect, useContext } from 'react';
+import { Navigate, useParams }                from 'react-router-dom';
+import { AuthContext }                         from '../contexts/AuthContext';
+import { listAllAppointments, submit_payment, submit_approval } from '../api/appointments';
 import './RepairProgressPage.css';
 
 const steps = [
@@ -12,44 +14,120 @@ const steps = [
 ];
 
 export default function RepairProgressPage() {
-  const [currentStep, setCurrentStep] = useState(0);
-  const amountDue = 30.0;
+  const { user }          = useContext(AuthContext);
   const { appointmentId } = useParams();
-  const [stage, setStage]   = useState('Payment');    // current step
-  const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState('');
+  const [ appointment, setAppointment ] = useState(null);
+  const [ loading, setLoading ]         = useState(true);
+  const [ error, setError ]             = useState('');
+  const [ paying, setPaying ]           = useState(false);
+  const [ approving, setApproving ]     = useState(false);
+  const DiagnosticFee = 30;
 
+
+  useEffect(() => {
+    if (!user) return;
+    setLoading(true);
+    listAllAppointments()
+      .then(res => {
+        const appt = res.data.find(a => a.id === Number(appointmentId));
+        if (!appt) throw new Error();
+        setAppointment(appt);
+      })
+      .catch(() => setError('Could not load your appointment.'))
+      .finally(() => setLoading(false));
+  }, [user, appointmentId]);
+
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+  if (loading) {
+    return <p className="loading">Loading…</p>;
+  }
+  if (error || !appointment) {
+    return <p className="error">{error || 'Appointment not found.'}</p>;
+  }
+  //statLower in a funtion to be called everytime change of state is expected
+  
+  const stateLower = appointment.state.toLowerCase();
+  const price = Number(appointment.price);
+  const when = new Date(appointment.datetime).toLocaleString('pt-PT', {
+    dateStyle: 'short', timeStyle: 'short'
+  });
+
+  // 1) Still waiting for drop-off?
+  if (stateLower === 'started') {
+    return (
+      <div className="repair-page">
+        <h1 className="title">Repair Progress</h1>
+        <div className="scheduled">
+          <strong>Scheduled for {when}</strong> – Waiting for drop-off
+        </div>
+      </div>
+    );
+  }
+
+  // 2) compute step index directly from state
+  let stepIndex = 0;
+  if (stateLower === 'started')  stepIndex = 0;
+  else if (stateLower === 'payment')      stepIndex = 1;      
+  else if (stateLower === 'diagnosis')     stepIndex = 2;
+  else if (stateLower === 'approval')      stepIndex = 3;
+  else if (stateLower === 'approved')       stepIndex = 4;
+  else if (stateLower === 'final payment & pickup') stepIndex = 5;
+
+  
 
   const handlePayment = async () => {
-  console.log('🔍 paying appointmentId (type=%s):', typeof appointmentId, appointmentId)
-  setLoading(true);
-  setError('');
-  try {
-    await submit_payment(appointmentId, true);
-    setStage('RepairStarted');
-  } catch (e) {
-    console.error('Payment failed:', e);
-    setError('Payment failed. Please try again.');
-  } finally {
-    setLoading(false);
-  }
-};
+    setPaying(true);
+    setError('');
+    try {
+      await submit_payment(appointment.id, true);
+      // no local step state—backend flip will re-render us into next UI
+    } catch {
+      setError('Payment failed. Please try again.');
+    } finally {
+      setPaying(false);
+    }
+  };
+
+  //funtion to accept quote
+  const handleAcceptQuote = async () => {
+    setApproving(true);
+    setError('');
+    try {
+      await submit_approval(appointment.id, true);
+      // no local step state—backend flip will re-render us into next UI
+    } catch {
+      setError('Quote acceptance failed. Please try again.');
+    } 
+    finally {
+      setApproving(false);
+    }
+  };
 
   const renderStepContent = () => {
-    switch (currentStep) {
+    switch (stepIndex) {
       case 0:
+          return (
+        <div className="repair-page">
+          <h1 className="title">Repair Progress</h1>
+          <div className="scheduled">
+            <strong>Scheduled for {when}</strong> – Waiting for drop-off
+          </div>
+        </div>
+      );
+      case 1: // Payment
         return (
           <div className="step-content">
             <h2>Diagnostic Fee Payment</h2>
             <p>Please pay the diagnostic fee to proceed:</p>
             <div className="payment-box">
               <span className="currency">€</span>
-              <span className="amount">{amountDue.toFixed(2)}</span>
+              <span className="amount">{DiagnosticFee.toFixed(2)}</span>
             </div>
             <button
               onClick={async () => {
               handlePayment();
-              setCurrentStep(1);
               }}
               className="action-btn"
             >
@@ -57,17 +135,59 @@ export default function RepairProgressPage() {
             </button>
           </div>
         );
-      // ... other cases ...
+      case 2:
+        return (
+          <div className="step-content">
+            <h2>Diagnosis</h2>
+            <p>Your device is being diagnosed. We’ll notify you when it’s done.</p>
+          </div>
+        );
+      case 3:
+        return (
+          <div className="step-content">
+            <h2>Quote Approval</h2>
+          
+            <p>Please approve your repair quote.</p>
+            <div className="payment-box">
+              <span className="currency">€</span>
+              <span className="amount">{price.toFixed(2)}</span>
+            </div>
+          
+            <button
+              onClick={async () => {
+                handleAcceptQuote();
+              }}
+              className="action-btn"
+            >
+              Accept Quote
+            </button>
+          </div>
+        );
+      case 4:
+        return (
+          <div className="step-content">
+            <h2>Repair Process</h2>
+            <p>Your device is currently under repair.</p>
+          </div>
+        );
+      case 5:
+        return (
+          <div className="step-content">
+            <h2>Final Payment & Pickup</h2>
+            <p>Repair is complete! Please pick up your device and settle final payment.</p>
+          </div>
+        );
       default:
         return null;
     }
   };
 
-  const fillPercent = (currentStep / (steps.length - 1)) * 100;
+  const fillPercent = (stepIndex / (steps.length - 1)) * 100;
 
   return (
     <div className="repair-page">
       <h1 className="title">Repair Progress</h1>
+
       <div className="progress-container">
         <div className="progress-bar-bg">
           <div
@@ -79,12 +199,13 @@ export default function RepairProgressPage() {
           {steps.map((_, idx) => (
             <div
               key={idx}
-              className={`progress-step ${idx <= currentStep ? 'active' : ''}`}
+              className={`progress-step ${idx <= stepIndex ? 'active' : ''}`}
               style={{ left: `${(idx / (steps.length - 1)) * 100}%` }}
             />
           ))}
         </div>
       </div>
+
       {renderStepContent()}
     </div>
   );

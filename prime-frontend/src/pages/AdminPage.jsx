@@ -59,7 +59,7 @@ export default function AdminPage() {
   };
 
   const handleComplete = () => {
-    repair_completed(selectedApp.id)
+    repair_completed(selectedApp.id, true)
       .then(() => {
         setPopupMsg({ type:'success', text: 'Repair completed.' });
         fetchAppointments();
@@ -132,11 +132,16 @@ export default function AdminPage() {
                 Awaiting payment
               </p>
             )}
-            {selectedApp.state === 'Repair started' && (
+            {selectedApp.state === 'Approved' && (
               <>
-                <button className="popup-button" onClick={handleStart}>
+                <p>Start Repair?</p>
+                <button className="popup-button" onClick={()=>handleStart()}>
                   Start Repair
                 </button>
+              </>
+            )}
+            {selectedApp.state === 'Repair started' && (
+              <>
                 <button className="popup-button" onClick={handleComplete}>
                   Mark Repair Completed
                 </button>

@@ -464,7 +464,7 @@ def repair_completed(request):
         try:
             appointment = Appointment.objects.get(id=appointment_id)
             if repair_completed:
-                appointment.state = "Awaiting pickup"
+                appointment.state = "Waiting pickup"
                 appointment.save()
             else:
                 appointment.state = "Repair failed"

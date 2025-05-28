@@ -38,8 +38,8 @@ export function submit_payment(appointment_id, paid) {
   });
 }
 
-export function submit_approval(appointment_id, approval_data) {
-  return api.post('/workflow/submit-approval/', { appointment_id, approval_data });
+export function submit_approval(appointment_id, approved) {
+  return api.post('/workflow/approval/', { appointment_id, customer_approved: approved });
 }
 
 export function repair_started(appointment_id, start) {
@@ -48,4 +48,9 @@ export function repair_started(appointment_id, start) {
 
 export function repair_completed(appointment_id, complete) {
   return api.post('/workflow/repair-completed/', { appointment_id, repair_completed: complete });
+}
+
+export async function getAppointmentById(id) {
+  const res = await listAllAppointments();
+  return res.data.find(a => a.id === Number(id));
 }
