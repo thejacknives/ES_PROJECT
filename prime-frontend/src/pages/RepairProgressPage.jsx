@@ -21,20 +21,19 @@ export default function RepairProgressPage() {
 
 
   const handlePayment = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      // Pass appointmentId and a `true` flag for payment_received
-      console.log('About to pay for appointment:', appointmentId);
-      await submit_payment(appointmentId, true);
-      setStage('RepairStarted');
-    } catch (e) {
-      console.error(e);
-      setError('Payment failed. Please try again.');
-    } finally {
-      setLoading(false);
-    }
-  };
+  console.log('🔍 paying appointmentId (type=%s):', typeof appointmentId, appointmentId)
+  setLoading(true);
+  setError('');
+  try {
+    await submit_payment(appointmentId, true);
+    setStage('RepairStarted');
+  } catch (e) {
+    console.error('Payment failed:', e);
+    setError('Payment failed. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   const renderStepContent = () => {
     switch (currentStep) {

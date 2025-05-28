@@ -32,7 +32,10 @@ export function customer_showed_up(appointment_id, showed_up) {
 }
 
 export function submit_payment(appointment_id, paid) {
-  return api.post('/workflow/submit-payment/', { appointment_id, payment_recieved: paid });
+  return api.post('/workflow/submit-payment/', {
+    appointment_id: Number(appointment_id),   // coerce to integer
+    payment_received: paid                    // boolean flag
+  });
 }
 
 export function submit_approval(appointment_id, approval_data) {

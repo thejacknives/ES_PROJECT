@@ -390,7 +390,7 @@ def submit_approval(request):
         try:
             appointment = Appointment.objects.get(id=appointment_id)
             if approved:
-                appointment.state = "Repair started"
+                appointment.state = "Approved"
                 appointment.save()
             else:
                 appointment.state = "Approval failed"
@@ -428,7 +428,7 @@ def repair_started(request):
         try:
             appointment = Appointment.objects.get(id=appointment_id)
             if repair_started:
-                appointment.state = "Repair completed"
+                appointment.state = "Repair started"
                 appointment.save()
             else:
                 appointment.state = "Repair failed"
@@ -464,7 +464,7 @@ def repair_completed(request):
         try:
             appointment = Appointment.objects.get(id=appointment_id)
             if repair_completed:
-                appointment.state = "Pickup"
+                appointment.state = "Awaiting pickup"
                 appointment.save()
             else:
                 appointment.state = "Repair failed"
