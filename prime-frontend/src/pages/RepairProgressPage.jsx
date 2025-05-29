@@ -85,6 +85,7 @@ export default function RepairProgressPage() {
     setError('');
     try {
       await submit_payment(appointment.id, true);
+      fetchAppointment(); // refresh appointment state
       // no local step state—backend flip will re-render us into next UI
     } catch {
       setError('Payment failed. Please try again.');
@@ -99,6 +100,7 @@ export default function RepairProgressPage() {
     setError('');
     try {
       await submit_approval(appointment.id, true);
+      fetchAppointment(); // refresh appointment state
       // no local step state—backend flip will re-render us into next UI
     } catch {
       setError('Quote acceptance failed. Please try again.');
@@ -113,6 +115,7 @@ export default function RepairProgressPage() {
     setError('');
     try {
       await submit_pickup(appointment.id, true);
+      fetchAppointment(); // refresh appointment state
       // no local step state—backend flip will re-render us into next UI
     } catch {
       setError('Quote acceptance failed. Please try again.');
@@ -121,6 +124,23 @@ export default function RepairProgressPage() {
       setPickup(false);
     }
   };
+
+  // Fetch helper
+  const fetchAppointment = async () => {
+    try {
+      const res = await listAllAppointments();
+      const appt = res.data.find(a => a.id === Number(appointmentId));
+      if (!appt) throw new Error('Appointment not found');
+      setAppointment(appt);
+    } catch (err) {
+      console.error(err);
+      setError('Failed to load appointment details.');
+      setAppointment(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
 
 
   const renderStepContent = () => {
@@ -215,7 +235,7 @@ export default function RepairProgressPage() {
         case 6:
         return (
           <div className="step-content">
-            <h2>Reapair Ended</h2>
+            <h2>Repair Ended</h2>
             <p>You have payed your invoice and picked-up your device.</p>
             <p>Thank you for using our service!</p>
             <Link to="/my-repairs/"> Go Back </Link>

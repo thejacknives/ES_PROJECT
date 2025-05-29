@@ -18,6 +18,7 @@ export default function AdminPage() {
   const [showPopup, setShowPopup]       = useState(false);
   const [selectedApp, setSelectedApp]   = useState(null);
   const [popupMsg, setPopupMsg]         = useState(null); // { type:'success'|'error', text }
+  const [msgTimer, setMsgTimer]         = useState(null);
 
   // fetch helper:
   const fetchAppointments = () => {
@@ -25,15 +26,40 @@ export default function AdminPage() {
       .then(r => setAppointments(r.data))
       .catch(() => setError('Failed to load appointments.'));
   };
+
+  // Helper to clear popup message after delay
+  const clearPopupMessage = () => {
+    if (msgTimer) clearTimeout(msgTimer);
+    const timer = setTimeout(() => setPopupMsg(null), 3000); // Clear after 3 seconds
+    setMsgTimer(timer);
+  };
+
+  // Helper to update the selected app with fresh data
+  const updateSelectedApp = (appointments, selectedAppId) => {
+    const updatedApp = appointments.find(app => app.id === selectedAppId);
+    if (updatedApp) {
+      setSelectedApp(updatedApp);
+    }
+  };
+
   useEffect(() => { if (user?.user_id === 1) fetchAppointments(); }, [user]);
+  
+  // Update selectedApp when appointments change (if popup is open)
+  useEffect(() => {
+    if (showPopup && selectedApp) {
+      updateSelectedApp(appointments, selectedApp.id);
+    }
+  }, [appointments, showPopup, selectedApp?.id]);
+
   if (user?.user_id !== 1) return <Navigate to="/login" replace />;
 
   const started = appointments.filter(a => a.state !== 'Ended');
-  const past    = appointments.filter(a => a.state === 'Ended');
+  const past    = appointments.filter(a => a.state === 'Ended' );
   const data    = view === 'started' ? started : past;
 
   const openManage = app => {
     setPopupMsg(null);
+    if (msgTimer) clearTimeout(msgTimer); // Clear any existing timer
     setSelectedApp(app);
     setShowPopup(true);
   };
@@ -44,27 +70,39 @@ export default function AdminPage() {
         setPopupMsg({ type:'success', text: didShow
           ? 'Presence recorded! Awaiting payment.'
           : 'No-show recorded.' });
-        fetchAppointments();
+        clearPopupMessage(); // Auto-clear message after 3 seconds
+        fetchAppointments(); // This will trigger the useEffect to update selectedApp
       })
-      .catch(() => setPopupMsg({ type:'error', text: 'Failed to record presence.' }));
+      .catch(() => {
+        setPopupMsg({ type:'error', text: 'Failed to record presence.' });
+        clearPopupMessage(); // Auto-clear error message too
+      });
   };
 
   const handleStart = () => {
     repair_started(selectedApp.id)
       .then(() => {
         setPopupMsg({ type:'success', text: 'Repair started.' });
-        fetchAppointments();
+        clearPopupMessage(); // Auto-clear message after 3 seconds
+        fetchAppointments(); // This will trigger the useEffect to update selectedApp
       })
-      .catch(() => setPopupMsg({ type:'error', text: 'Failed to start repair.' }));
+      .catch(() => {
+        setPopupMsg({ type:'error', text: 'Failed to start repair.' });
+        clearPopupMessage(); // Auto-clear error message too
+      });
   };
 
   const handleComplete = () => {
     repair_completed(selectedApp.id, true)
       .then(() => {
         setPopupMsg({ type:'success', text: 'Repair completed.' });
-        fetchAppointments();
+        clearPopupMessage(); // Auto-clear message after 3 seconds
+        fetchAppointments(); // This will trigger the useEffect to update selectedApp
       })
-      .catch(() => setPopupMsg({ type:'error', text: 'Failed to complete repair.' }));
+      .catch(() => {
+        setPopupMsg({ type:'error', text: 'Failed to complete repair.' });
+        clearPopupMessage(); // Auto-clear error message too
+      });
   };
 
   return (
@@ -156,7 +194,10 @@ export default function AdminPage() {
 
             <button
               className="popup-button close-btn"
-              onClick={()=>setShowPopup(false)}
+              onClick={() => {
+                if (msgTimer) clearTimeout(msgTimer); // Clear timer when closing
+                setShowPopup(false);
+              }}
             >
               Close
             </button>
