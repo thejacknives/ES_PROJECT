@@ -63,9 +63,21 @@ export default function AdminPage() {
   ];
 
  
-  const started = appointments.filter(a => a.state !== 'Ended' && a.state !== "Did not show up" && a.state !== "Payment failed" && a.state !== "Approval failed" && a.state !== "Repair failed" && a.state !== "Pickup failed");
-  const past    = appointments.filter(a => a.state === 'Ended' || a.state ==="Did not show up" || a.state === "Payment failed"  || a.state === "Approval failed" || a.state === "Repair failed" || a.state === "Pickup failed");
+  const started = appointments.filter(a => a.state !== 'Ended' && a.state !== "No show" && a.state !== "Payment failed" && a.state !== "Approval failed" && a.state !== "Repair failed" && a.state !== "Pickup failed");
+  const past    = appointments.filter(a => a.state === 'Ended' || a.state ==="Nos show" || a.state === "Payment failed"  || a.state === "Approval failed" || a.state === "Repair failed" || a.state === "Pickup failed");
   const data    = view === 'started' ? started : past;
+
+  // Sort: urgent first, then by ascending ID
+  const sortedData = data.slice().sort((a, b) => {
+    if (a.urgency === b.urgency) {
+      return a.id - b.id;
+    }
+    // Convert boolean to number; true > false, but we want true first, so subtract
+    return (b.urgency === true) - (a.urgency === true);
+  });
+  // Split into urgent and regular
+  const urgentData = sortedData.filter(a => a.urgency);
+  const regularData = sortedData.filter(a => !a.urgency);
 
   const openManage = app => {
     setPopupMsg(null);
@@ -127,35 +139,74 @@ export default function AdminPage() {
 
       <section>
         <h2>{view==='started'?'Started Repair Processes':'Past Repair Processes'}</h2>
-        {data.length===0
-          ? <p>No {view} appointments.</p>
-          : <table className="admin-table">
-              <thead>
-                <tr>
-                  <th>ID</th><th>User ID</th><th>Service</th>
-                  <th>Date &amp; Time</th><th>Urgent</th><th>State</th>
-                  <th>Manage</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.map(a=>(
-                  <tr key={a.id}>
-                    <td>{a.id}</td>
-                    <td>{a.user_id}</td>
-                    <td>{a.service}</td>
-                    <td>{new Date(a.datetime).toLocaleString()}</td>
-                    <td>{a.urgency?'Yes':'No'}</td>
-                    <td>{a.state}</td>
-                    <td>
-                      <button className="manage-btn" onClick={()=>openManage(a)}>
-                        Manage
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-        }
+        {data.length===0 ? (
+          <p>No {view} appointments.</p>
+        ) : (
+          <>
+            {urgentData.length > 0 && (
+              <>
+                <h3>Urgent</h3>
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th><th>User ID</th><th>Service</th>
+                      <th>Date &amp; Time</th><th>Urgent</th><th>State</th>
+                      <th>Manage</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {urgentData.map(a=>(
+                      <tr key={a.id}>
+                        <td>{a.id}</td>
+                        <td>{a.user_id}</td>
+                        <td>{a.service}</td>
+                        <td>{new Date(a.datetime).toLocaleString()}</td>
+                        <td>{a.urgency?'Yes':'No'}</td>
+                        <td>{a.state}</td>
+                        <td>
+                          <button className="manage-btn" onClick={()=>openManage(a)}>
+                            Manage
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
+            )}
+            {regularData.length > 0 && (
+              <>
+                <h3>Regular</h3>
+                <table className="admin-table">
+                  <thead>
+                    <tr>
+                      <th>ID</th><th>User ID</th><th>Service</th>
+                      <th>Date &amp; Time</th><th>Urgent</th><th>State</th>
+                      <th>Manage</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {regularData.map(a=>(
+                      <tr key={a.id}>
+                        <td>{a.id}</td>
+                        <td>{a.user_id}</td>
+                        <td>{a.service}</td>
+                        <td>{new Date(a.datetime).toLocaleString()}</td>
+                        <td>{a.urgency?'Yes':'No'}</td>
+                        <td>{a.state}</td>
+                        <td>
+                          <button className="manage-btn" onClick={()=>openManage(a)}>
+                            Manage
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
+            )}
+          </>
+        )}
       </section>
 
       {showPopup && selectedApp && (

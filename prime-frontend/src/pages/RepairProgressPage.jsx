@@ -23,7 +23,8 @@ export default function RepairProgressPage() {
   const [ paying, setPaying ]           = useState(false);
   const [ approving, setApproving ]     = useState(false);
   const [ pickingup, setPickup]         = useState(false);
-  const DiagnosticFee = 30;
+  const DiagnosticFee = 20;
+  const UrgentFee = 30;
 
 
   useEffect(() => {
@@ -71,12 +72,11 @@ export default function RepairProgressPage() {
   // 2) compute step index directly from state
   let stepIndex = 0;
   if (stateLower === 'started')  stepIndex = 0;
-  else if (stateLower === 'payment')      stepIndex = 1;      
-  else if (stateLower === 'diagnosis')     stepIndex = 2;
-  else if (stateLower === 'approval')      stepIndex = 3;
-  else if (stateLower === 'approved')       stepIndex = 4;
-  else if (stateLower === 'waiting pickup') stepIndex = 5;
-  else if (stateLower === 'ended')          stepIndex = 6;
+  else if (stateLower === 'payment')      stepIndex = 1;
+  else if (stateLower === 'approval')      stepIndex = 2;
+  else if (stateLower === 'approved')       stepIndex = 3;
+  else if (stateLower === 'waiting pickup') stepIndex = 4;
+  else if (stateLower === 'ended')          stepIndex = 5;
 
   
 
@@ -176,13 +176,6 @@ export default function RepairProgressPage() {
       case 2:
         return (
           <div className="step-content">
-            <h2>Diagnosis</h2>
-            <p>Your device is being diagnosed. We’ll notify you when it’s done.</p>
-          </div>
-        );
-      case 3:
-        return (
-          <div className="step-content">
             <h2>Quote Approval</h2>
           
             <p>Please approve your repair quote.</p>
@@ -202,22 +195,21 @@ export default function RepairProgressPage() {
           </div>
         );
       case 4:
-        return (
-          <div className="step-content">
-            <h2>Repair Process</h2>
-            <p>Your device is currently under repair.</p>
-          </div>
-        );
-      case 5:
         const totalPrice = parseFloat(appointment.price) || 0;
-        const remaining  = Math.max(0, totalPrice - DiagnosticFee);
+        const urgentFee = appointment.urgency ? UrgentFee : 0;
+        const totalWithUrgent = totalPrice + urgentFee;
+        const remaining = Math.max(0, totalWithUrgent - DiagnosticFee);
+        
         return (
           <div className="step-content">
             <h2>Final Payment & Pickup</h2>
             <p>Repair is complete! Please settle the remaining balance and pick up your device.</p>
             <div className="billing-box">
-              <div>Repair Quote: €{totalPrice.toFixed(2)}</div>
-              <div>Diagnostic Fee Paid: €{DiagnosticFee.toFixed(2)}</div>
+              <div>Repair Quote: {totalPrice.toFixed(2)}€</div>
+              {appointment.urgency && (
+                <div>Urgent Service Fee: {urgentFee.toFixed(2)}€</div>
+              )}
+              <div>Diagnostic Fee Paid: -{DiagnosticFee.toFixed(2)}€</div>
               <hr/>
               <div><strong>Amount Due: €{remaining.toFixed(2)}</strong></div>
             </div>
@@ -232,7 +224,7 @@ export default function RepairProgressPage() {
           </div>
         );
 
-        case 6:
+        case 5:
         return (
           <div className="step-content">
             <h2>Repair Ended</h2>
