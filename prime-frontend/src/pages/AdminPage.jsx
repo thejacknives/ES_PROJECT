@@ -53,8 +53,8 @@ export default function AdminPage() {
 
   if (user?.user_id !== 1) return <Navigate to="/login" replace />;
 
-  const started = appointments.filter(a => a.state !== 'Ended');
-  const past    = appointments.filter(a => a.state === 'Ended' );
+  const started = appointments.filter(a => a.state !== 'Ended' && a.state !== "Did not show up" && a.state !== "Payment failed" && a.state !== "Approval failed" && a.state !== "Repair failed" && a.state !== "Pickup failed");
+  const past    = appointments.filter(a => a.state === 'Ended' || a.state ==="Did not show up" || a.state === "Payment failed"  || a.state === "Approval failed" || a.state === "Repair failed" || a.state === "Pickup failed");
   const data    = view === 'started' ? started : past;
 
   const openManage = app => {
