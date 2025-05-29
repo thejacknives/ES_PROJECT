@@ -54,3 +54,7 @@ export async function getAppointmentById(id) {
   const res = await listAllAppointments();
   return res.data.find(a => a.id === Number(id));
 }
+
+export function submit_pickup(appointment_id, ready){
+  return api.post('/workflow/pickup/', { appointment_id, picked_up: ready });
+}

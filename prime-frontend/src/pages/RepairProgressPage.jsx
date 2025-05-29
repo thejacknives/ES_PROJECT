@@ -1,8 +1,9 @@
 // src/pages/RepairProgressPage.jsx
 import React, { useState, useEffect, useContext } from 'react';
-import { Navigate, useParams }                from 'react-router-dom';
+import { Navigate, redirect, useParams }                from 'react-router-dom';
 import { AuthContext }                         from '../contexts/AuthContext';
-import { listAllAppointments, submit_payment, submit_approval } from '../api/appointments';
+import { listAllAppointments, submit_payment, submit_approval, submit_pickup } from '../api/appointments';
+import { Link, useNavigate } from 'react-router-dom';
 import './RepairProgressPage.css';
 
 const steps = [
@@ -21,6 +22,7 @@ export default function RepairProgressPage() {
   const [ error, setError ]             = useState('');
   const [ paying, setPaying ]           = useState(false);
   const [ approving, setApproving ]     = useState(false);
+  const [ pickingup, setPickup]         = useState(false);
   const DiagnosticFee = 30;
 
 
@@ -73,7 +75,8 @@ export default function RepairProgressPage() {
   else if (stateLower === 'diagnosis')     stepIndex = 2;
   else if (stateLower === 'approval')      stepIndex = 3;
   else if (stateLower === 'approved')       stepIndex = 4;
-  else if (stateLower === 'final payment & pickup') stepIndex = 5;
+  else if (stateLower === 'waiting pickup') stepIndex = 5;
+  else if (stateLower === 'ended')          stepIndex = 6;
 
   
 
@@ -104,6 +107,21 @@ export default function RepairProgressPage() {
       setApproving(false);
     }
   };
+
+  const handlePickup = async () => {
+    setPickup(true);
+    setError('');
+    try {
+      await submit_pickup(appointment.id, true);
+      // no local step state—backend flip will re-render us into next UI
+    } catch {
+      setError('Quote acceptance failed. Please try again.');
+    } 
+    finally {
+      setPickup(false);
+    }
+  };
+
 
   const renderStepContent = () => {
     switch (stepIndex) {
@@ -171,10 +189,36 @@ export default function RepairProgressPage() {
           </div>
         );
       case 5:
+        const totalPrice = parseFloat(appointment.price) || 0;
+        const remaining  = Math.max(0, totalPrice - DiagnosticFee);
         return (
           <div className="step-content">
             <h2>Final Payment & Pickup</h2>
-            <p>Repair is complete! Please pick up your device and settle final payment.</p>
+            <p>Repair is complete! Please settle the remaining balance and pick up your device.</p>
+            <div className="billing-box">
+              <div>Repair Quote: €{totalPrice.toFixed(2)}</div>
+              <div>Diagnostic Fee Paid: €{DiagnosticFee.toFixed(2)}</div>
+              <hr/>
+              <div><strong>Amount Due: €{remaining.toFixed(2)}</strong></div>
+            </div>
+            {error && <p className="error">{error}</p>}
+            <button
+              onClick={() => handlePickup()}
+              disabled={paying || remaining === 0}
+              className="action-btn"
+            >
+              {paying ? 'Processing…' : `Pay Remaining €${remaining.toFixed(2)}`}
+            </button>
+          </div>
+        );
+
+        case 6:
+        return (
+          <div className="step-content">
+            <h2>Reapair Ended</h2>
+            <p>You have payed your invoice and picked-up your device.</p>
+            <p>Thank you for using our service!</p>
+            <Link to="/my-repairs/"> Go Back </Link>
           </div>
         );
       default:
