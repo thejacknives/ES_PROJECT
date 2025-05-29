@@ -11,19 +11,26 @@ export default function MyRepairsPage() {
   const [error, setError]     = useState('');
   const navigate = useNavigate();
 
-  useEffect(() => {
+useEffect(() => {
     setLoading(true);
-    listAllAppointments(user.user_id)
-      .then(res => {
-        setRepairs(res.data);
-        setLoading(false);
-      })
-      .catch(err => {
-        console.error(err);
-        setError('Failed to load your repairs.');
-        setLoading(false);
-      });
-  }, [user]);
+    listAllAppointments()
+        .then(res => {
+            // only keep those where appointment.user_id === logged-in user
+            const mine = res.data.filter(a => a.user_id === user.user_id);
+            setLoading(false);
+            setRepairs(mine);
+            if (mine.length === 0) {
+                setError('No scheduled appointments');
+            } else {
+                setError('');
+            }
+        })
+        .catch(err => {
+            console.error(err);
+            setError('Failed to load your repairs.');
+            setLoading(false);
+        });
+}, [user]);
 
   if (!user) {
     return <p>Please log in to see your repairs.</p>;
@@ -35,9 +42,6 @@ export default function MyRepairsPage() {
       {loading && <p>Loading…</p>}
       {error && <p className="error">{error}</p>}
 
-      {!loading && !repairs.length && (
-        <p>You have no ongoing repairs right now.</p>
-      )}
 
       <ul className="repair-list">
         {repairs.map(r => (

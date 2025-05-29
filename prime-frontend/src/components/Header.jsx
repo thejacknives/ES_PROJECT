@@ -23,7 +23,6 @@ export default function Header() {
           <Link to="/">Home</Link>
           <Link to="/services">Services</Link>
           <Link to="/make-appointment">Make Appointment</Link>
-          <Link to="/repair-progress">Repair Progress</Link>
           <Link to="/my-repairs">My Repairs</Link>
           <div className="spacer" />
 

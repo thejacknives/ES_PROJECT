@@ -32,7 +32,13 @@ function App() {
             </PrivateRoute>
           }
         />
-        <Route path="/my-repairs" element={<MyRepairsPage />} />
+        <Route 
+        path="/my-repairs" 
+        element={
+          <PrivateRoute>
+            <MyRepairsPage />
+          </PrivateRoute>} />
+
         <Route
           path="/repair-progress/:appointmentId"
           element={<RepairProgressPage />}
