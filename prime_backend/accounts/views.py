@@ -110,6 +110,7 @@ def test_start_workflow(request):
 def submit_repair_request(request):
     user_id = request.data.get("user_id")
     service = request.data.get("service")
+    price = request.data.get("price")
     urgency = request.data.get("urgency", False)
     appointment_datetime = request.data.get("appointment_datetime")
    
@@ -124,6 +125,7 @@ def submit_repair_request(request):
     Appointment.objects.create(
         user_id=user_id,
         service=service,
+        price=price,
         datetime=appointment_datetime,
         urgency=urgency
     )
@@ -134,6 +136,7 @@ def submit_repair_request(request):
     input_data = {
         "user_id": user_id,
         "service": service,
+        "price": price,
         "urgency": urgency,
         "appointment_datetime": appointment_datetime, 
         "appointment_id": appointment_id
