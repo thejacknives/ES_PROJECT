@@ -28,8 +28,17 @@ export default function AdminPage() {
   useEffect(() => { if (user?.user_id === 1) fetchAppointments(); }, [user]);
   if (user?.user_id !== 1) return <Navigate to="/login" replace />;
 
-  const started = appointments.filter(a => a.state !== 'Ended');
-  const past    = appointments.filter(a => a.state === 'Ended');
+  const terminalStates = [
+    'Ended',
+    'No show',
+    'Payment failed',
+    'Approval failed',
+    'Repair failed',
+    'Pickup failed'
+  ];
+
+  const started = appointments.filter(a => !terminalStates.includes(a.state));
+  const past    = appointments.filter(a => terminalStates.includes(a.state));
   const data    = view === 'started' ? started : past;
 
   const openManage = app => {
