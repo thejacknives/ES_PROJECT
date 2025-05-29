@@ -37,6 +37,7 @@ export default function MakeAppointmentPage() {
     const payload = {
       user_id: user.user_id,
       service: serviceName,
+      price: services.find(s => s.name === serviceName).base_price,
       appointment_datetime: `${date}T${slot}:00Z`,
       urgency
     };
