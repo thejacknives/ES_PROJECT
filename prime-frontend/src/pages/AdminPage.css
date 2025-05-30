@@ -213,7 +213,7 @@
 }
 
 .popup h3:before {
-  content: '🔧';
+  content: ' ';
   font-size: 1.25rem;
 }
 
