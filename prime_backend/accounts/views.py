@@ -343,6 +343,12 @@ def submit_payment(request):
         return Response({"error": "appointment_id is required."}, status=400)
     
     try:
+        appointment = Appointment.objects.get(id=appointment_id)
+        
+        # IDEMPOTENCY CHECK
+        if appointment.paid:
+            return Response({"message": "Payment already processed."}, status=200)
+        
         response = table.get_item(Key={'appointment_id': appointment_id})
         token = response.get('Item', {}).get('task_token')
         if not token:
@@ -353,20 +359,18 @@ def submit_payment(request):
             output=json.dumps({"payment_received": paid})
         )
 
-        try:
-            appointment = Appointment.objects.get(id=appointment_id)
-            if paid:
-                appointment.state = "Approval"
-                appointment.save()
-            else:
-                appointment.state = "Payment failed"
-                appointment.save()
-        except Appointment.DoesNotExist:
-            return Response({"error": "Appointment not found."}, status=404)
-
+        if paid:
+            appointment.state = "Approval"
+            appointment.paid = True  
+            appointment.save()
+        else:
+            appointment.state = "Payment failed"
+            appointment.save()
 
         return Response({"message": "Payment callback sent successfully."})
 
+    except Appointment.DoesNotExist:
+        return Response({"error": "Appointment not found."}, status=404)
     except Exception as e:
         return Response({"error": str(e)}, status=500)
 
