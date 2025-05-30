@@ -27,6 +27,7 @@ const ServicesPage = () => {
     const name = serviceName.toLowerCase();
     if (name.includes('screen') || name.includes('display')) return '📱';
     if (name.includes('battery')) return '🔋';
+    if (name.includes('keyboard') || name.includes('touchpad')) return '⌨️';
     if (name.includes('camera')) return '📷';
     if (name.includes('speaker') || name.includes('audio')) return '🔊';
     if (name.includes('charging') || name.includes('port')) return '🔌';
