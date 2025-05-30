@@ -18,6 +18,7 @@ from datetime import datetime, timedelta, time
 import boto3
 import os
 
+
 @api_view(['POST'])
 def login_with_face(request):
     face_image = request.FILES['face_image']
