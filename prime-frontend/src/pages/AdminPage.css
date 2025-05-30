@@ -1,71 +1,174 @@
 .admin-page {
   padding: 4rem;
-  max-width: 1000px;
+  max-width: 1200px;
   margin: 0 auto;
-  font-family: sans-serif;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  min-height: 100vh;
+  color: #1a1a1a;
 }
 
 .admin-page h1 {
   text-align: center;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: white;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  letter-spacing: -0.02em;
 }
 
 .admin-page section {
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
+  background: white;
+  border-radius: 16px;
+  padding: 2rem;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+  backdrop-filter: blur(10px);
 }
 
 .admin-page h2 {
-  color: #3f51b5;
-  margin-bottom: 1rem;
+  color: #2d3748;
+  margin-bottom: 1.5rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+  border-bottom: 2px solid #e2e8f0;
+  padding-bottom: 0.75rem;
+}
+
+.admin-page h3 {
+  color: #4a5568;
+  margin: 2rem 0 1rem 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.admin-page h3:before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: linear-gradient(135deg, #667eea, #764ba2);
+  border-radius: 2px;
+}
+
+.view-switch {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 2rem;
+  background: #f7fafc;
+  padding: 0.5rem;
+  border-radius: 12px;
+  width: fit-content;
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.06);
 }
 
 .view-switch button {
-  padding: 6px 10px;
-  border-radius: 6px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 8px;
   border: none;
-  background: white;
-  color: #333;
+  background: transparent;
+  color: #4a5568;
   font-size: 1rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.4s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+}
+
+.view-switch button:hover {
+  color: #2d3748;
+  transform: translateY(-1px);
 }
 
 .view-switch .active {
-  background: #3b82f6;
+  background: linear-gradient(135deg, #3f51b5, #303f9f);
   color: white;
+  box-shadow: 0 4px 15px rgba(63, 81, 181, 0.3);
 }
 
 .admin-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   margin-bottom: 1rem;
+  background: white;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
 }
 
 .admin-table th,
 .admin-table td {
-  padding: 0.75rem;
-  border: 1px solid #ddd;
+  padding: 1rem 1.25rem;
   text-align: left;
+  border-bottom: 1px solid #e2e8f0;
 }
 
 .admin-table th {
-  background: #f3f3f3;
+  background: linear-gradient(135deg, #f8fafc, #e2e8f0);
+  color: #2d3748;
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.admin-table tbody tr {
+  transition: all 0.2s ease;
+}
+
+.admin-table tbody tr:hover {
+  background: #f8fafc;
+  transform: scale(1.01);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.admin-table tbody tr:last-child td {
+  border-bottom: none;
 }
 
 .error {
-  color: #b00020;
+  color: #e53e3e;
   text-align: center;
+  background: #fed7d7;
+  padding: 1rem;
+  border-radius: 8px;
+  border: 1px solid #feb2b2;
+  margin-bottom: 1rem;
+  font-weight: 500;
 }
 
 .manage-btn {
-  padding: 5px 5px;
-  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
   border: none;
-  background: #3b82f6;
+  background: linear-gradient(135deg, #4299e1, #3182ce);
   color: white;
-  font-size: 1rem;
+  font-size: 0.875rem;
+  font-weight: 500;
   cursor: pointer;
-  transition: all 0.4s ease;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 2px 4px rgba(66, 153, 225, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 80px;
+}
+
+.manage-btn:hover {
+  background: linear-gradient(135deg, #3182ce, #2b6cb0);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(66, 153, 225, 0.4);
+}
+
+.manage-btn:active {
+  transform: translateY(0);
 }
 
 .popup-overlay {
@@ -74,58 +177,386 @@
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(0, 0, 0, 0.5);
-
-  /* flex‐box centering */
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
   display: flex;
   align-items: center;
   justify-content: center;
-
   z-index: 1000;
+  animation: fadeIn 0.3s ease-out;
 }
 
 .popup {
   background: white;
-  padding: 2rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-  max-width: 400px;
-  width: 80%;
+  padding: 2.5rem;
+  border-radius: 20px;
+  box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+  max-width: 480px;
+  width: 90%;
+  max-height: 90vh;
+  overflow-y: auto;
   text-align: center;
-  position: relative; /* above overlay */
+  position: relative;
   z-index: 1001;
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.popup h3 {
+  color: #2d3748;
+  margin-bottom: 1.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.popup h3:before {
+  content: '🔧';
+  font-size: 1.25rem;
+}
+
+.popup p {
+  margin-bottom: 1.5rem;
+  color: #4a5568;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.action-section {
+  margin: 1.5rem 0;
 }
 
 .popup-button {
-  background-color: #3f51b5;
+  background: linear-gradient(135deg, #667eea, #764ba2);
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+  padding: 0.75rem 1.5rem;
+  border-radius: 12px;
   cursor: pointer;
-  margin-bottom: 1rem;
+  margin: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+  min-width: 140px;
+  display: inline-block;
+}
+
+.popup-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(102, 126, 234, 0.6);
+  background: linear-gradient(135deg, #5a67d8, #6b46c1);
+}
+
+.popup-button:active {
+  transform: translateY(0);
+}
+
+.popup-feedback {
+  margin: 1.5rem 0;
+  padding: 1rem;
+  border-radius: 12px;
+  font-weight: 500;
+  animation: slideIn 0.3s ease-out;
 }
 
 .popup-feedback.success {
-  margin: 1rem 0;
-  color: #00695c;
-  background: #e8f5e9;
-  padding: 0.5rem;
-  border-radius: 4px;
-  text-align: center;
+  color: #22543d;
+  background: linear-gradient(135deg, #c6f6d5, #9ae6b4);
+  border: 1px solid #9ae6b4;
+  box-shadow: 0 2px 8px rgba(72, 187, 120, 0.2);
 }
 
 .popup-feedback.error {
-  margin: 1rem 0;
-  color: #c62828;
-  background: #ffebee;
-  padding: 0.5rem;
-  border-radius: 4px;
+  color: #742a2a;
+  background: linear-gradient(135deg, #fed7d7, #fc8181);
+  border: 1px solid #fc8181;
+  box-shadow: 0 2px 8px rgba(229, 62, 62, 0.2);
+}
+
+.popup-button.close-btn {
+  margin-top: 2rem;
+  background: linear-gradient(135deg, #718096, #4a5568);
+  box-shadow: 0 4px 15px rgba(113, 128, 150, 0.3);
+}
+
+.popup-button.close-btn:hover {
+  background: linear-gradient(135deg, #4a5568, #2d3748);
+  box-shadow: 0 8px 25px rgba(113, 128, 150, 0.5);
+}
+
+/* Loading states */
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 2rem;
+  min-height: 200px;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 3px solid #e2e8f0;
+  border-top: 3px solid #3f51b5;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1rem;
+}
+
+.loading-text {
+  color: #6b7280;
+  font-size: 1rem;
+  font-weight: 500;
   text-align: center;
 }
 
-/* Make sure Close button sits apart */
-.popup-button.close-btn {
-  margin-top: 1rem;
-  background: #6c757d;
+/* Small loading spinner for buttons */
+.loading-spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+/* Empty state styling */
+.empty-state {
+  text-align: center;
+  padding: 4rem 2rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
+  backdrop-filter: blur(20px);
+  box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+}
+
+.empty-state h3 {
+  color: #2b2d42;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+  font-weight: 600;
+}
+
+.empty-state p {
+  color: #666;
+  font-size: 1.1rem;
+  line-height: 1.6;
+  margin-bottom: 0;
+}
+
+.empty-state-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+  opacity: 0.7;
+}
+
+/* Animation keyframes */
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/* Status badges - simple colored circles around text */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: white;
+  gap: 0;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Hide the status indicator dot - we don't need it */
+.status-indicator {
+  display: none !important;
+  width: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+}
+
+
+
+/* Status colors - applied directly to the badge (pastel shades) */
+.status-badge .status-started,
+.status-badge:has(.status-started) {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.status-badge .status-approved,
+.status-badge:has(.status-approved) {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.status-badge .status-payment,
+.status-badge:has(.status-payment) {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.status-badge .status-repair,
+.status-badge:has(.status-repair) {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
+.status-badge .status-completed,
+.status-badge:has(.status-completed) {
+  background: #cffafe;
+  color: #0e7490;
+}
+
+.status-badge .status-ended,
+.status-badge:has(.status-ended) {
+  background: #e5e7eb;
+  color: #374151;
+}
+
+/* Direct status classes for fallback (pastel shades) */
+.status-started { 
+  background: #fef3c7 !important;
+  color: #b45309 !important;
+}
+.status-approved { 
+  background: #d1fae5 !important;
+  color: #047857 !important;
+}
+.status-payment { 
+  background: #dbeafe !important;
+  color: #1e40af !important;
+}
+.status-repair { 
+  background: #ede9fe !important;
+  color: #6d28d9 !important;
+}
+.status-completed { 
+  background: #cffafe !important;
+  color: #0e7490 !important;
+}
+.status-ended { 
+  background: #e5e7eb !important;
+  color: #374151 !important;
+}
+
+/* Priority badges */
+.priority-badge {
+  display: inline-block;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.priority-badge.urgent {
+  background: #fed7d7;
+  color: #c53030;
+  border: 1px solid #feb2b2;
+}
+
+.priority-badge.regular {
+  background: #e2e8f0;
+  color: #4a5568;
+  border: 1px solid #cbd5e0;
+}
+
+/* Table container for horizontal scrolling on mobile */
+.table-container {
+  overflow-x: auto;
+  border-radius: 12px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .admin-page {
+    padding: 1rem;
+  }
+  
+  .admin-page h1 {
+    font-size: 2rem;
+    margin-bottom: 2rem;
+  }
+  
+  .admin-page section {
+    padding: 1.5rem;
+  }
+  
+  .admin-table th,
+  .admin-table td {
+    padding: 0.75rem;
+    font-size: 0.875rem;
+  }
+  
+  .popup {
+    padding: 2rem;
+    margin: 1rem;
+    max-width: calc(100vw - 2rem);
+  }
+  
+  .popup-button {
+    padding: 0.625rem 1.25rem;
+    font-size: 0.875rem;
+    margin: 0.25rem;
+    min-width: 120px;
+  }
+}
+
+/* Enhanced focus states for accessibility */
+.view-switch button:focus,
+.manage-btn:focus,
+.popup-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.5);
+}
+
+/* Disabled button states */
+.manage-btn:disabled,
+.popup-button:disabled,
+.view-switch button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
 }

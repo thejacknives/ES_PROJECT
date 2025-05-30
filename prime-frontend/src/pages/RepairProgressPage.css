@@ -1,11 +1,11 @@
-/* RepairProgressPage.css */
+/* RepairProgressPage.css - Updated Version */
 
 .repair-page {
   max-width: 800px;
   margin: 0 auto;
-  padding: 4rem;
+  padding: 4rem 2rem;
   text-align: center;
-  background: linear-gradient(to bottom right, #e9efff, #f3e9ff);
+  background: transparent;
   min-height: 100vh;
   box-sizing: border-box;
 }
@@ -13,117 +13,243 @@
 .title {
   font-size: 2.5rem;
   color: #2b2d42;
-  margin-bottom: 2rem;
+  margin-bottom: 3rem;
+  font-weight: 600;
 }
 
 /* Progress Bar Container */
 .progress-container {
   position: relative;
-  height: 24px;
-  margin-bottom: 3rem;
+  margin-bottom: 4rem;
+  padding: 0;
+  max-width: relative;
+  margin-left:  0rem;
+  margin-right: 0rem;
 }
 
 /* Gray background track */
 .progress-bar-bg {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
+  position: relative;
   height: 8px;
   background: #d3d3d3;
   border-radius: 4px;
-  transform: translateY(-50%);
+  margin-bottom: 2rem;
 }
 
 /* Blue fill up to current step */
 .progress-bar-fill {
   position: absolute;
-  top: 50%;
+  top: 0;
   left: 0;
   height: 8px;
   background: #3f51b5;
-  border-radius: 4px 0 0 4px;
-  transform: translateY(-50%);
+  border-radius: 4px;
   transition: width 0.4s ease;
 }
 
-/* Step circles */
+/* Step circles and labels container */
 .progress-steps {
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 0;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: -12px;
+}
+
+.progress-step-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  position: relative;
 }
 
 .progress-step {
-  position: absolute;
-  top: 50%;
-  width: 16px;
-  height: 16px;
-  margin-top: -8px;
-  margin-left: -8px;
+  width: 20px;
+  height: 20px;
   border-radius: 50%;
-  background: #666;
-  transition: background 0.4s ease;
+  background: #d3d3d3;
+  border: 3px solid #fff;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+  margin-bottom: 0.5rem;
 }
 
 .progress-step.active {
   background: #3f51b5;
+  transform: scale(1.1);
+}
+
+.progress-step.completed {
+  background: #4caf50;
+}
+
+.step-label {
+  font-size: 0.85rem;
+  color: #666;
+  text-align: center;
+  line-height: 1.2;
+  max-width: 120px;
+  transition: color 0.3s ease;
+}
+
+.step-label.active {
+  color: #3f51b5;
+  font-weight: 600;
+}
+
+.step-label.completed {
+  color: #4caf50;
 }
 
 /* Content for each step */
 .step-content {
-  max-width: 400px;
+  max-width: 500px;
   margin: 0 auto;
   text-align: center;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  backdrop-filter: blur(10px);
 }
 
 .step-content h2 {
   margin-bottom: 1rem;
   color: #2b2d42;
+  font-size: 1.8rem;
 }
 
 .step-content p {
   margin-bottom: 1.5rem;
-  color: #333;
+  color: #555;
+  line-height: 1.6;
 }
 
-/* Payment box styling */
+/* Payment/billing box styling */
+.payment-box, .billing-box {
+  background: white;
+  border-radius: 12px;
+  padding: 1.5rem;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  margin-bottom: 2rem;
+  border: 2px solid #f0f0f0;
+}
+
 .payment-box {
   display: inline-flex;
   align-items: baseline;
-  background: white;
-  border-radius: 8px;
-  padding: 0.5rem 1rem;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  margin-bottom: 1.5rem;
+  justify-content: center;
+  min-width: 150px;
 }
 
 .payment-box .currency {
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   margin-right: 0.25rem;
   color: #3f51b5;
+  font-weight: 600;
 }
 
 .payment-box .amount {
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: bold;
   color: #3f51b5;
 }
 
+.billing-box {
+  text-align: left;
+  font-size: 1.1rem;
+}
+
+.billing-box div {
+  margin-bottom: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+}
+
+.billing-box hr {
+  border: none;
+  border-top: 2px solid #e0e0e0;
+  margin: 1rem 0;
+}
+
 /* Action button */
 .action-btn {
-  background: #3f51b5;
+  background: linear-gradient(135deg, #3f51b5, #303f9f);
   border: none;
   color: white;
-  padding: 0.75rem 1.5rem;
+  padding: 1rem 2rem;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 1.1rem;
+  font-weight: 600;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(63, 81, 181, 0.3);
+  min-width: 200px;
 }
 
 .action-btn:hover {
-  background: #303f9f;
+  background: linear-gradient(135deg, #303f9f, #283593);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(63, 81, 181, 0.4);
+}
+
+.action-btn:disabled {
+  background: #ccc;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.scheduled {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.1);
+  backdrop-filter: blur(10px);
+  font-size: 1.2rem;
+  color: #2b2d42;
+}
+
+.error {
+  background: #ffebee;
+  color: #c62828;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  border-left: 4px solid #c62828;
+}
+
+.loading {
+  font-size: 1.2rem;
+  color: #666;
+  padding: 2rem;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+  .repair-page {
+    padding: 2rem 1rem;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  .progress-container {
+    padding: 0 1rem;
+  }
+  
+  .step-label {
+    font-size: 0.75rem;
+    max-width: 80px;
+  }
+  
+  .step-content {
+    padding: 1.5rem;
+  }
+  
+  .payment-box .amount {
+    font-size: 2rem;
+  }
 }

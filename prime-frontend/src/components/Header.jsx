@@ -20,7 +20,6 @@ export default function Header() {
         <img src={logo} alt="Logo" className="header-logo" />
 
         <nav className="header-nav">
-          <Link to="/">Home</Link>
           <Link to="/services">Services</Link>
           <Link to="/make-appointment">Make Appointment</Link>
           <Link to="/my-repairs">My Repairs</Link>

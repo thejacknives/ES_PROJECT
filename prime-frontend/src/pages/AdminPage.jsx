@@ -13,24 +13,58 @@ import './AdminPage.css';
 export default function AdminPage() {
   const { user } = useContext(AuthContext);
   const [appointments, setAppointments] = useState([]);
-  const [error, setError]               = useState('');
-  const [view, setView]                 = useState('started');
-  const [showPopup, setShowPopup]       = useState(false);
-  const [selectedApp, setSelectedApp]   = useState(null);
-  const [popupMsg, setPopupMsg]         = useState(null); // { type:'success'|'error', text }
-  const [msgTimer, setMsgTimer]         = useState(null);
+  const [error, setError] = useState('');
+  const [view, setView] = useState('started');
+  const [showPopup, setShowPopup] = useState(false);
+  const [selectedApp, setSelectedApp] = useState(null);
+  const [popupMsg, setPopupMsg] = useState(null);
+  const [msgTimer, setMsgTimer] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // fetch helper:
-  const fetchAppointments = () => {
-    listAllAppointments()
-      .then(r => setAppointments(r.data))
-      .catch(() => setError('Failed to load appointments.'));
+  // Helper to get status indicator class
+  const getStatusClass = (state) => {
+    const statusMap = {
+      'started': 'status-started',
+      'Approved': 'status-approved',
+      'Payment': 'status-payment',
+      'Repair started': 'status-repair',
+      'Waiting pickup': 'status-completed',
+      'Ended': 'status-ended'
+    };
+    return statusMap[state] || 'status-started';
+  };
+
+  // Helper to format state display
+  const formatState = (state) => {
+    const stateMap = {
+      'started': 'Started',
+      'Payment': 'Awaiting Payment',
+      'Approved': 'Payment Approved',
+      'Repair started': 'Repair In Progress',
+      'Waiting pickup': 'Ready for Pickup',
+      'Ended': 'Completed'
+    };
+    return stateMap[state] || state;
+  };
+
+  // Fetch helper with loading state
+  const fetchAppointments = async () => {
+    setIsLoading(true);
+    try {
+      const response = await listAllAppointments();
+      setAppointments(response.data);
+      setError('');
+    } catch (err) {
+      setError('Failed to load appointments. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   // Helper to clear popup message after delay
   const clearPopupMessage = () => {
     if (msgTimer) clearTimeout(msgTimer);
-    const timer = setTimeout(() => setPopupMsg(null), 3000); // Clear after 3 seconds
+    const timer = setTimeout(() => setPopupMsg(null), 3000);
     setMsgTimer(timer);
   };
 
@@ -42,7 +76,9 @@ export default function AdminPage() {
     }
   };
 
-  useEffect(() => { if (user?.user_id === 1) fetchAppointments(); }, [user]);
+  useEffect(() => { 
+    if (user?.user_id === 1) fetchAppointments(); 
+  }, [user]);
   
   // Update selectedApp when appointments change (if popup is open)
   useEffect(() => {
@@ -50,6 +86,13 @@ export default function AdminPage() {
       updateSelectedApp(appointments, selectedApp.id);
     }
   }, [appointments, showPopup, selectedApp?.id]);
+
+  // Cleanup timer on unmount
+  useEffect(() => {
+    return () => {
+      if (msgTimer) clearTimeout(msgTimer);
+    };
+  }, [msgTimer]);
 
   if (user?.user_id !== 1) return <Navigate to="/login" replace />;
 
@@ -62,206 +105,269 @@ export default function AdminPage() {
     'Pickup failed'
   ];
 
- 
-  const started = appointments.filter(a => a.state !== 'Ended' && a.state !== "No show" && a.state !== "Payment failed" && a.state !== "Approval failed" && a.state !== "Repair failed" && a.state !== "Pickup failed");
-  const past    = appointments.filter(a => a.state === 'Ended' || a.state ==="Nos show" || a.state === "Payment failed"  || a.state === "Approval failed" || a.state === "Repair failed" || a.state === "Pickup failed");
-  const data    = view === 'started' ? started : past;
+  const started = appointments.filter(a => !terminalStates.includes(a.state));
+  const past = appointments.filter(a => terminalStates.includes(a.state));
+  const data = view === 'started' ? started : past;
 
   // Sort: urgent first, then by ascending ID
   const sortedData = data.slice().sort((a, b) => {
     if (a.urgency === b.urgency) {
       return a.id - b.id;
     }
-    // Convert boolean to number; true > false, but we want true first, so subtract
     return (b.urgency === true) - (a.urgency === true);
   });
+
   // Split into urgent and regular
   const urgentData = sortedData.filter(a => a.urgency);
   const regularData = sortedData.filter(a => !a.urgency);
 
   const openManage = app => {
     setPopupMsg(null);
-    if (msgTimer) clearTimeout(msgTimer); // Clear any existing timer
+    if (msgTimer) clearTimeout(msgTimer);
     setSelectedApp(app);
     setShowPopup(true);
   };
 
-  const handleShowedUp = didShow => {
-    customer_showed_up(selectedApp.id, didShow)
-      .then(() => {
-        setPopupMsg({ type:'success', text: didShow
-          ? 'Presence recorded! Awaiting payment.'
-          : 'No-show recorded.' });
-        clearPopupMessage(); // Auto-clear message after 3 seconds
-        fetchAppointments(); // This will trigger the useEffect to update selectedApp
-      })
-      .catch(() => {
-        setPopupMsg({ type:'error', text: 'Failed to record presence.' });
-        clearPopupMessage(); // Auto-clear error message too
+  const handleShowedUp = async (didShow) => {
+    setIsLoading(true);
+    try {
+      await customer_showed_up(selectedApp.id, didShow);
+      setPopupMsg({ 
+        type: 'success', 
+        text: didShow ? 'Presence recorded! Awaiting payment.' : 'No-show recorded.' 
       });
+      clearPopupMessage();
+      await fetchAppointments();
+    } catch (err) {
+      setPopupMsg({ type: 'error', text: 'Failed to record presence.' });
+      clearPopupMessage();
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleStart = () => {
-    repair_started(selectedApp.id)
-      .then(() => {
-        setPopupMsg({ type:'success', text: 'Repair started.' });
-        clearPopupMessage(); // Auto-clear message after 3 seconds
-        fetchAppointments(); // This will trigger the useEffect to update selectedApp
-      })
-      .catch(() => {
-        setPopupMsg({ type:'error', text: 'Failed to start repair.' });
-        clearPopupMessage(); // Auto-clear error message too
-      });
+  const handleStart = async () => {
+    setIsLoading(true);
+    try {
+      await repair_started(selectedApp.id);
+      setPopupMsg({ type: 'success', text: 'Repair started successfully.' });
+      clearPopupMessage();
+      await fetchAppointments();
+    } catch (err) {
+      setPopupMsg({ type: 'error', text: 'Failed to start repair.' });
+      clearPopupMessage();
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const handleComplete = () => {
-    repair_completed(selectedApp.id, true)
-      .then(() => {
-        setPopupMsg({ type:'success', text: 'Repair completed.' });
-        clearPopupMessage(); // Auto-clear message after 3 seconds
-        fetchAppointments(); // This will trigger the useEffect to update selectedApp
-      })
-      .catch(() => {
-        setPopupMsg({ type:'error', text: 'Failed to complete repair.' });
-        clearPopupMessage(); // Auto-clear error message too
-      });
+  const handleComplete = async () => {
+    setIsLoading(true);
+    try {
+      await repair_completed(selectedApp.id, true);
+      setPopupMsg({ type: 'success', text: 'Repair completed successfully.' });
+      clearPopupMessage();
+      await fetchAppointments();
+    } catch (err) {
+      setPopupMsg({ type: 'error', text: 'Failed to complete repair.' });
+      clearPopupMessage();
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const renderAppointmentTable = (data, title) => (
+    <>
+      <h3>{title}</h3>
+      <div className="table-container">
+        <table className="admin-table">
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>User ID</th>
+              <th>Service</th>
+              <th>Date & Time</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {data.map(a => (
+              <tr key={a.id}>
+                <td><strong>#{a.id}</strong></td>
+                <td>{a.user_id}</td>
+                <td>{a.service}</td>
+                <td>{new Date(a.datetime).toLocaleString()}</td>
+                <td>
+                  <span className={`priority-badge ${a.urgency ? 'urgent' : 'regular'}`}>
+                    {a.urgency ? 'Urgent' : 'Regular'}
+                  </span>
+                </td>
+                <td>
+                  <span className="status-badge">
+                    <span className={`status-indicator ${getStatusClass(a.state)}`}></span>
+                    {formatState(a.state)}
+                  </span>
+                </td>
+                <td>
+                  <button 
+                    className="manage-btn" 
+                    onClick={() => openManage(a)}
+                    disabled={isLoading}
+                  >
+                    {isLoading ? <span className="loading"></span> : 'Manage'}
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </>
+  );
 
   return (
     <div className="admin-page">
       <h1>Admin Dashboard</h1>
-      {error && <p className="error">{error}</p>}
+      
+      {error && (
+        <div className="error">
+          <strong>Error:</strong> {error}
+        </div>
+      )}
 
       <div className="view-switch">
-        <button className={view==='started'?'active':''} onClick={()=>setView('started')}>Started</button>
-        <button className={view==='past'?'active':''}   onClick={()=>setView('past')}>Past</button>
+        <button 
+          className={view === 'started' ? 'active' : ''} 
+          onClick={() => setView('started')}
+          disabled={isLoading}
+        >
+          Active Processes ({started.length})
+        </button>
+        <button 
+          className={view === 'past' ? 'active' : ''} 
+          onClick={() => setView('past')}
+          disabled={isLoading}
+        >
+          Completed ({past.length})
+        </button>
       </div>
 
       <section>
-        <h2>{view==='started'?'Started Repair Processes':'Past Repair Processes'}</h2>
-        {data.length===0 ? (
-          <p>No {view} appointments.</p>
+        <h2>
+          {view === 'started' ? 'Active Repair Processes' : 'Completed Repair Processes'}
+        </h2>
+        
+        {isLoading ? (
+          <div style={{ textAlign: 'center', padding: '2rem' }}>
+            
+            <p style={{ marginTop: '1rem', color: '#6b7280' }}>Loading appointments...</p>
+          </div>
+        ) : data.length === 0 ? (
+          <div style={{ textAlign: 'center', padding: '3rem', color: '#6b7280' }}>
+            <div style={{ fontSize: '3rem', marginBottom: '1rem' }}>
+              {view === 'started' ? '📭' : '🎉'}
+            </div>
+            <p style={{ fontSize: '1.125rem' }}>
+              No {view} appointments found.
+            </p>
+          </div>
         ) : (
           <>
-            {urgentData.length > 0 && (
-              <>
-                <h3>Urgent</h3>
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>ID</th><th>User ID</th><th>Service</th>
-                      <th>Date &amp; Time</th><th>Urgent</th><th>State</th>
-                      <th>Manage</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {urgentData.map(a=>(
-                      <tr key={a.id}>
-                        <td>{a.id}</td>
-                        <td>{a.user_id}</td>
-                        <td>{a.service}</td>
-                        <td>{new Date(a.datetime).toLocaleString()}</td>
-                        <td>{a.urgency?'Yes':'No'}</td>
-                        <td>{a.state}</td>
-                        <td>
-                          <button className="manage-btn" onClick={()=>openManage(a)}>
-                            Manage
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </>
-            )}
-            {regularData.length > 0 && (
-              <>
-                <h3>Regular</h3>
-                <table className="admin-table">
-                  <thead>
-                    <tr>
-                      <th>ID</th><th>User ID</th><th>Service</th>
-                      <th>Date &amp; Time</th><th>Urgent</th><th>State</th>
-                      <th>Manage</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {regularData.map(a=>(
-                      <tr key={a.id}>
-                        <td>{a.id}</td>
-                        <td>{a.user_id}</td>
-                        <td>{a.service}</td>
-                        <td>{new Date(a.datetime).toLocaleString()}</td>
-                        <td>{a.urgency?'Yes':'No'}</td>
-                        <td>{a.state}</td>
-                        <td>
-                          <button className="manage-btn" onClick={()=>openManage(a)}>
-                            Manage
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </>
-            )}
+            {urgentData.length > 0 && renderAppointmentTable(urgentData, 'Urgent Appointments')}
+            {regularData.length > 0 && renderAppointmentTable(regularData, 'Regular Appointments')}
           </>
         )}
       </section>
 
       {showPopup && selectedApp && (
-        <div className="popup-overlay">
+        <div className="popup-overlay" onClick={(e) => {
+          if (e.target === e.currentTarget) {
+            if (msgTimer) clearTimeout(msgTimer);
+            setShowPopup(false);
+          }
+        }}>
           <div className="popup">
             <h3>Appointment #{selectedApp.id}</h3>
-            <p>Current state: <strong>{selectedApp.state}</strong></p>
+            <p>
+              <strong>Current Status:</strong> 
+              <span className="status-badge" style={{ marginLeft: '0.5rem' }}>
+                <span className={`status-indicator ${getStatusClass(selectedApp.state)}`}></span>
+                {formatState(selectedApp.state)}
+              </span>
+            </p>
 
             {selectedApp.state === 'started' && (
-              <>
-                <p>Customer arrival?</p>
-                <button className="popup-button" onClick={()=>handleShowedUp(true)}>
-                  Customer Showed Up
+              <div className="action-section">
+                <p style={{ marginBottom: '1rem' }}>👤 Has the customer arrived?</p>
+                <button 
+                  className="popup-button" 
+                  onClick={() => handleShowedUp(true)}
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Loading...' : '✅ Customer Showed Up'}
                 </button>
-                <button className="popup-button" onClick={()=>handleShowedUp(false)}>
-                  No Show
+                <button 
+                  className="popup-button" 
+                  onClick={() => handleShowedUp(false)}
+                  disabled={isLoading}
+                >
+                  {isLoading ? 'Loading...' : '❌ No Show'}
                 </button>
-              </>
+              </div>
             )}
+            
             {selectedApp.state === 'Payment' && (
-              <p className="popup-feedback success">
-                Awaiting payment
-              </p>
+              <div className="popup-feedback success">
+                💳 Awaiting payment confirmation...
+              </div>
             )}
+            
             {selectedApp.state === 'Approved' && (
-              <>
-                <p>Start Repair?</p>
-                <button className="popup-button" onClick={()=>handleStart()}>
+              <div className="action-section">
+                <p style={{ marginBottom: '1rem' }}>🔧 Ready to start repair?</p>
+                <button 
+                  className="popup-button" 
+                  onClick={handleStart}
+                  disabled={isLoading}
+                >
                   Start Repair
                 </button>
-              </>
+              </div>
             )}
+            
             {selectedApp.state === 'Repair started' && (
-              <>
-                <button className="popup-button" onClick={handleComplete}>
-                  Mark Repair Completed
+              <div className="action-section">
+                <p style={{ marginBottom: '1rem' }}>⚙️ Is the repair complete?</p>
+                <button 
+                  className="popup-button" 
+                  onClick={handleComplete}
+                  disabled={isLoading}
+                >
+                  ✅ Mark Repair Completed
                 </button>
-              </>
+              </div>
             )}
 
             {popupMsg && (
-              <p className={`popup-feedback ${popupMsg.type}`}>
-                {popupMsg.text}
-              </p>
+              <div className={`popup-feedback ${popupMsg.type}`}>
+                {popupMsg.type === 'success' ? '✅' : '⚠️'} {popupMsg.text}
+              </div>
             )}
 
             <button
               className="popup-button close-btn"
               onClick={() => {
-                if (msgTimer) clearTimeout(msgTimer); // Clear timer when closing
+                if (msgTimer) clearTimeout(msgTimer);
                 setShowPopup(false);
               }}
+              disabled={isLoading}
             >
               Close
             </button>
+
+            
           </div>
         </div>
       )}

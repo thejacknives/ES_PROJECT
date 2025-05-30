@@ -1,17 +1,17 @@
 // src/pages/RepairProgressPage.jsx
 import React, { useState, useEffect, useContext } from 'react';
-import { Navigate, redirect, useParams }                from 'react-router-dom';
+import { Navigate, redirect, useParams, useNavigate }                from 'react-router-dom';
 import { AuthContext }                         from '../contexts/AuthContext';
 import { listAllAppointments, submit_payment, submit_approval, submit_pickup } from '../api/appointments';
-import { Link, useNavigate } from 'react-router-dom';
 import './RepairProgressPage.css';
 
 const steps = [
+  'Waiting for Drop-off',
   'Diagnostic Fee',
-  'Diagnosis',
   'Quote Approval',
   'Repair Process',
-  'Final Payment & Pickup'
+  'Final Payment & Pickup',
+  'Repair Finished'
 ];
 
 export default function RepairProgressPage() {
@@ -23,9 +23,9 @@ export default function RepairProgressPage() {
   const [ paying, setPaying ]           = useState(false);
   const [ approving, setApproving ]     = useState(false);
   const [ pickingup, setPickup]         = useState(false);
+  const navigate          = useNavigate();
   const DiagnosticFee = 20;
   const UrgentFee = 30;
-
 
   useEffect(() => {
     if (!user) return;
@@ -49,36 +49,21 @@ export default function RepairProgressPage() {
   if (error || !appointment) {
     return <p className="error">{error || 'Appointment not found.'}</p>;
   }
-  //statLower in a funtion to be called everytime change of state is expected
-  
+
   const stateLower = appointment.state.toLowerCase();
   const price = Number(appointment.price);
   const when = new Date(appointment.datetime).toLocaleString('pt-PT', {
     dateStyle: 'short', timeStyle: 'short'
   });
 
-  // 1) Still waiting for drop-off?
-  if (stateLower === 'started') {
-    return (
-      <div className="repair-page">
-        <h1 className="title">Repair Progress</h1>
-        <div className="scheduled">
-          <strong>Scheduled for {when}</strong> – Waiting for drop-off
-        </div>
-      </div>
-    );
-  }
-
-  // 2) compute step index directly from state
+  // Compute step index directly from state
   let stepIndex = 0;
-  if (stateLower === 'started')  stepIndex = 0;
+  if (stateLower === 'started')           stepIndex = 0;
   else if (stateLower === 'payment')      stepIndex = 1;
-  else if (stateLower === 'approval')      stepIndex = 2;
-  else if (stateLower === 'approved')       stepIndex = 3;
+  else if (stateLower === 'approval')     stepIndex = 2;
+  else if (stateLower === 'approved')     stepIndex = 3;
   else if (stateLower === 'waiting pickup') stepIndex = 4;
-  else if (stateLower === 'ended')          stepIndex = 5;
-
-  
+  else if (stateLower === 'ended')        stepIndex = 5;
 
   const handlePayment = async () => {
     setPaying(true);
@@ -86,7 +71,6 @@ export default function RepairProgressPage() {
     try {
       await submit_payment(appointment.id, true);
       fetchAppointment(); // refresh appointment state
-      // no local step state—backend flip will re-render us into next UI
     } catch {
       setError('Payment failed. Please try again.');
     } finally {
@@ -94,14 +78,12 @@ export default function RepairProgressPage() {
     }
   };
 
-  //funtion to accept quote
   const handleAcceptQuote = async () => {
     setApproving(true);
     setError('');
     try {
       await submit_approval(appointment.id, true);
       fetchAppointment(); // refresh appointment state
-      // no local step state—backend flip will re-render us into next UI
     } catch {
       setError('Quote acceptance failed. Please try again.');
     } 
@@ -116,9 +98,8 @@ export default function RepairProgressPage() {
     try {
       await submit_pickup(appointment.id, true);
       fetchAppointment(); // refresh appointment state
-      // no local step state—backend flip will re-render us into next UI
     } catch {
-      setError('Quote acceptance failed. Please try again.');
+      setError('Pickup confirmation failed. Please try again.');
     } 
     finally {
       setPickup(false);
@@ -141,19 +122,17 @@ export default function RepairProgressPage() {
     }
   };
 
-
-
   const renderStepContent = () => {
     switch (stepIndex) {
-      case 0:
-          return (
-        <div className="repair-page">
-          <h1 className="title">Repair Progress</h1>
-          <div className="scheduled">
-            <strong>Scheduled for {when}</strong> – Waiting for drop-off
+      case 0: // Waiting for drop-off
+        return (
+          <div className="step-content">
+            <h2>Waiting for Drop-off</h2>
+            <p><strong>Scheduled for {when}</strong></p>
+            <p>Please bring your device to our repair center at the scheduled time.</p>
+            <p>Your repair has started and we're waiting for you to drop off your device.</p>
           </div>
-        </div>
-      );
+        );
       case 1: // Payment
         return (
           <div className="step-content">
@@ -164,37 +143,41 @@ export default function RepairProgressPage() {
               <span className="amount">{DiagnosticFee.toFixed(2)}</span>
             </div>
             <button
-              onClick={async () => {
-              handlePayment();
-              }}
+              onClick={handlePayment}
+              disabled={paying}
               className="action-btn"
             >
-              Pay Now
+              {paying ? 'Processing...' : 'Pay Now'}
             </button>
           </div>
         );
-      case 2:
+      case 2: // Quote Approval
         return (
           <div className="step-content">
             <h2>Quote Approval</h2>
-          
             <p>Please approve your repair quote.</p>
             <div className="payment-box">
               <span className="currency">€</span>
               <span className="amount">{price.toFixed(2)}</span>
             </div>
-          
             <button
-              onClick={async () => {
-                handleAcceptQuote();
-              }}
+              onClick={handleAcceptQuote}
+              disabled={approving}
               className="action-btn"
             >
-              Accept Quote
+              {approving ? 'Processing...' : 'Accept Quote'}
             </button>
           </div>
         );
-      case 4:
+      case 3: // Repair Process
+        return (
+          <div className="step-content">
+            <h2>Repair in Progress</h2>
+            <p>Your device is currently being repaired.</p>
+            <p>We'll notify you once the repair is complete and ready for pickup.</p>
+          </div>
+        );
+      case 4: // Final Payment & Pickup
         const totalPrice = parseFloat(appointment.price) || 0;
         const urgentFee = appointment.urgency ? UrgentFee : 0;
         const totalWithUrgent = totalPrice + urgentFee;
@@ -215,22 +198,26 @@ export default function RepairProgressPage() {
             </div>
             {error && <p className="error">{error}</p>}
             <button
-              onClick={() => handlePickup()}
-              disabled={paying || remaining === 0}
+              onClick={handlePickup}
+              disabled={pickingup}
               className="action-btn"
             >
-              {paying ? 'Processing…' : `Pay Remaining €${remaining.toFixed(2)}`}
+              {pickingup ? 'Processing…' : `Pay Remaining €${remaining.toFixed(2)} & Pickup`}
             </button>
           </div>
         );
-
-        case 5:
+      case 5: // Ended
         return (
           <div className="step-content">
-            <h2>Repair Ended</h2>
-            <p>You have payed your invoice and picked-up your device.</p>
+            <h2>Repair Completed</h2>
+            <p>You have paid your invoice and picked up your device.</p>
             <p>Thank you for using our service!</p>
-            <Link to="/my-repairs/"> Go Back </Link>
+            <button 
+              onClick={() => navigate('/my-repairs/')} 
+              className="action-btn"
+            >
+              Go Back
+            </button>
           </div>
         );
       default:
@@ -252,12 +239,21 @@ export default function RepairProgressPage() {
           />
         </div>
         <div className="progress-steps">
-          {steps.map((_, idx) => (
-            <div
-              key={idx}
-              className={`progress-step ${idx <= stepIndex ? 'active' : ''}`}
-              style={{ left: `${(idx / (steps.length - 1)) * 100}%` }}
-            />
+          {steps.map((stepName, idx) => (
+            <div key={idx} className="progress-step-container">
+              <div
+                className={`progress-step ${
+                  idx < stepIndex ? 'completed' : idx === stepIndex ? 'active' : ''
+                }`}
+              />
+              <div
+                className={`step-label ${
+                  idx < stepIndex ? 'completed' : idx === stepIndex ? 'active' : ''
+                }`}
+              >
+                {stepName}
+              </div>
+            </div>
           ))}
         </div>
       </div>
